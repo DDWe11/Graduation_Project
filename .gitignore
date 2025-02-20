@@ -4,13 +4,9 @@
 *.iws
 out/
 
-# Eclipse
-.project
-.classpath
-.settings/
 
 # Build directories
-/target/
+target/
 /build/
 
 # Spring Boot specific
