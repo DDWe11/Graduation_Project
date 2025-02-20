@@ -1,0 +1,45 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# Build directories
+/target/
+/build/
+
+# Spring Boot specific
+*.log
+*.jar
+*.war
+
+# Maven specific
+/.mvn/
+/mvnw
+/mvnw.cmd
+
+# Gradle specific
+/.gradle/
+/gradle/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Other IDE specific files
+*.swp
+*~
+.idea/
+.vscode/
+
+# Local configuration files
+application.properties.bak
+application.yml
+
+# Logs
+logs/
