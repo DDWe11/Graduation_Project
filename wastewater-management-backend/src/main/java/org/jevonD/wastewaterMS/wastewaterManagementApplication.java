@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @MapperScan("org.jevonD.wastewaterMS.modules.*.repository")
 @SpringBootApplication
 public class wastewaterManagementApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(wastewaterManagementApplication.class, args);
         startLoadingAnimation();
