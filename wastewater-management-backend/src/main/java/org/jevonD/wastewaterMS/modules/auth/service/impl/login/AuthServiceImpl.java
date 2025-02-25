@@ -1,20 +1,22 @@
-package org.jevonD.wastewaterMS.modules.auth.service.impl;
+package org.jevonD.wastewaterMS.modules.auth.service.impl.login;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.jevonD.wastewaterMS.modules.auth.dto.LoginReq;
-import org.jevonD.wastewaterMS.modules.auth.dto.LoginResp;
+import org.jevonD.wastewaterMS.modules.auth.dto.login.LoginReq;
+import org.jevonD.wastewaterMS.modules.auth.dto.login.LoginResp;
 import org.jevonD.wastewaterMS.modules.auth.entity.SysUser;
 import org.jevonD.wastewaterMS.modules.auth.entity.SysRole;
 import org.jevonD.wastewaterMS.modules.auth.entity.SysUserRole;
 import org.jevonD.wastewaterMS.modules.auth.repository.SysRoleRepository;
 import org.jevonD.wastewaterMS.modules.auth.repository.SysUserRepository;
-import org.jevonD.wastewaterMS.modules.auth.repository.SysUserRoleRepository;  // 引入sys_user_role表的repository
+import org.jevonD.wastewaterMS.modules.auth.repository.SysUserRoleRepository;
 import org.jevonD.wastewaterMS.modules.auth.service.AuthService;
 import org.jevonD.wastewaterMS.common.utils.JwtUtils;
 import org.jevonD.wastewaterMS.common.exception.AuthException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -26,7 +28,7 @@ public class AuthServiceImpl implements AuthService {
     private SysRoleRepository roleRepository;
 
     @Autowired
-    private SysUserRoleRepository userRoleRepository;  // 引入sys_user_role表的repository
+    private SysUserRoleRepository userRoleRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -67,11 +69,18 @@ public class AuthServiceImpl implements AuthService {
         // 生成 JWT Token
         String token = jwtUtils.generateToken(user.getUsername());
 
+        // 获取当前时间
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        // 在更新数据库前，将当前的 login_time 存入 last_login_time，并将 currentTime 作为新的 login_time
+        userRepository.updateLoginInfo(user.getId(), currentTime, req.getLastLoginIp());
+
         // 返回包含 roleCode 的 LoginResp
         return LoginResp.builder()
                 .token(token)
                 .username(user.getUsername())
-                .roleCode(role.getRoleCode()) // 添加 roleCode
+                .roleCode(role.getRoleCode())
+                .loginTime(currentTime)
                 .build();
     }
 }
