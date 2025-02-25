@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import org.jevonD.wastewaterMS.modules.auth.entity.enums.RoleStatus;
 
 @Data
 @TableName("sys_role")  // 映射到数据库中的 sys_role 表

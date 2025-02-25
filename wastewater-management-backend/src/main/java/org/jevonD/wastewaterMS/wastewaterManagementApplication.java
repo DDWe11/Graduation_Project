@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class wastewaterManagementApplication {
     public static void main(String[] args) {
         SpringApplication.run(wastewaterManagementApplication.class, args);
-        startLoadingAnimation();
+//        startLoadingAnimation();
     }
     // 启动动画的方法
     private static void startLoadingAnimation() {
