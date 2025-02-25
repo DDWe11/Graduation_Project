@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.jevonD.wastewaterMS.modules.auth.repository.SysUserInfoRepository">
+
+    <!-- 基础ResultMap -->
+    <resultMap id="BaseResultMap" type="SysUserInfo">
+        <id column="user_id" property="userId" />
+        <result column="real_name" property="realName" />
+        <result column="gender" property="gender" />
+        <result column="birthdate" property="birthdate" />
+        <result column="job_number" property="jobNumber" />
+        <result column="department" property="department" />
+        <result column="position" property="position" />
+        <result column="entry_date" property="entryDate" />
+        <result column="phone" property="phone" />
+        <result column="email" property="email" />
+        <result column="emergency_contact" property="emergencyContact" />
+        <result column="emergency_phone" property="emergencyPhone" />
+    </resultMap>
+
+    <!-- 自定义查询方法 -->
+    <select id="selectByUserIdCustom" resultMap="BaseResultMap">
+        SELECT * FROM sys_user_info
+        WHERE user_id = #{userId}
+    </select>
+</mapper>

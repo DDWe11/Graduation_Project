@@ -1,7 +1,7 @@
-package org.jevonD.wastewaterMS.modules.auth.controller;
+package org.jevonD.wastewaterMS.modules.auth.controller.login;
 
-import org.jevonD.wastewaterMS.modules.auth.dto.LoginReq;
-import org.jevonD.wastewaterMS.modules.auth.dto.LoginResp;
+import org.jevonD.wastewaterMS.modules.auth.dto.login.LoginReq;
+import org.jevonD.wastewaterMS.modules.auth.dto.login.LoginResp;
 import org.jevonD.wastewaterMS.modules.auth.service.AuthService;
 import org.jevonD.wastewaterMS.common.utils.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
