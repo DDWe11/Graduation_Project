@@ -53,7 +53,7 @@ public class AdminUserServiceImpl extends ServiceImpl<SysUserRepository, SysUser
     @Transactional(rollbackFor = Exception.class)
     public SysUser createUser(AdminCreateReq req) {
         // 校验用户名唯一
-        if (userRepository.findByUsername(req.getUsername()) != null) {
+        if (userRepository.findByUsername(req.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username already exists");
         }
         // 查询当前最大 ID

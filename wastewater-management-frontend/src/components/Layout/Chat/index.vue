@@ -30,6 +30,13 @@
               </div>
             </div>
           </template>
+          <!-- 加载状态指示 -->
+          <div v-if="isLoading" class="loading-indicator">
+            <el-icon class="is-loading" :size="20">
+              <Loading />
+            </el-icon>
+            <span>AI正在思考中...</span>
+          </div>
         </div>
 
         <!-- 聊天输入区域 -->
@@ -37,16 +44,19 @@
           <el-input
             v-model="messageText"
             type="textarea"
-            :rows="3"
+            :rows="2"
             placeholder="输入消息"
             resize="none"
+            :disabled="isLoading"
             @keyup.enter.prevent="sendMessage"
           >
             <template #append>
               <div class="input-actions">
                 <el-button :icon="Paperclip" circle plain />
                 <el-button :icon="Picture" circle plain />
-                <el-button type="primary" @click="sendMessage" v-ripple>发送</el-button>
+                <el-button type="primary" @click="sendMessage" :loading="isLoading" v-ripple>
+                  {{ isLoading ? '处理中...' : '发送' }}
+                </el-button>
               </div>
             </template>
           </el-input>
@@ -55,7 +65,9 @@
               <i class="iconfont-sys">&#xe634;</i>
               <i class="iconfont-sys">&#xe809;</i>
             </div>
-            <el-button type="primary" @click="sendMessage" v-ripple>发送</el-button>
+            <el-button type="primary" @click="sendMessage" :loading="isLoading" v-ripple>
+              {{ isLoading ? '处理中...' : '发送' }}
+            </el-button>
           </div>
         </div>
       </div>
@@ -64,121 +76,128 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue'
-  import { Picture, Paperclip } from '@element-plus/icons-vue'
+  import { ref, onMounted, computed } from 'vue'
+  import { Picture, Paperclip, Loading, Close } from '@element-plus/icons-vue'
+  import axios from 'axios'
   import mittBus from '@/utils/mittBus'
   import meAvatar from '@/assets/img/avatar/avatar5.jpg'
   import aiAvatar from '@/assets/img/avatar/avatar10.jpg'
+  import { useWindowSize } from '@vueuse/core'
 
   const { width } = useWindowSize()
   const isMobile = computed(() => width.value < 500)
+  const getCurrentTime = () => {
+    return new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+  // API配置
+  const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY
+  const apiUrl = 'https://api.deepseek.com/chat/completions'
 
-  // 抽屉显示状态
+  // 状态管理
   const isDrawerVisible = ref(false)
-  // 是否在线
   const isOnline = ref(true)
-
-  // 消息相关数据
+  const isLoading = ref(false)
   const messageText = ref('')
   const messages = ref([
     {
       id: 1,
       sender: 'Art Bot',
       content: '你好！我是你的AI助手，有什么我可以帮你的吗？',
-      time: '10:00',
-      isMe: false,
-      avatar: aiAvatar
-    },
-    {
-      id: 2,
-      sender: 'Ricky',
-      content: '我想了解一下系统的使用方法。',
-      time: '10:01',
-      isMe: true,
-      avatar: meAvatar
-    },
-    {
-      id: 3,
-      sender: 'Art Bot',
-      content: '好的，我来为您介绍系统的主要功能。首先，您可以通过左侧菜单访问不同的功能模块...',
-      time: '10:02',
-      isMe: false,
-      avatar: aiAvatar
-    },
-    {
-      id: 4,
-      sender: 'Ricky',
-      content: '听起来很不错，能具体讲讲数据分析部分吗？',
-      time: '10:05',
-      isMe: true,
-      avatar: meAvatar
-    },
-    {
-      id: 5,
-      sender: 'Art Bot',
-      content: '当然可以。数据分析模块可以帮助您实时监控关键指标，并生成详细的报表...',
-      time: '10:06',
-      isMe: false,
-      avatar: aiAvatar
-    },
-    {
-      id: 6,
-      sender: 'Ricky',
-      content: '太好了，那我如何开始使用呢？',
-      time: '10:08',
-      isMe: true,
-      avatar: meAvatar
-    },
-    {
-      id: 7,
-      sender: 'Art Bot',
-      content: '您可以先创建一个项目，然后在项目中添加相关的数据源，系统会自动进行分析。',
-      time: '10:09',
-      isMe: false,
-      avatar: aiAvatar
-    },
-    {
-      id: 8,
-      sender: 'Ricky',
-      content: '明白了，谢谢你的帮助！',
-      time: '10:10',
-      isMe: true,
-      avatar: meAvatar
-    },
-    {
-      id: 9,
-      sender: 'Art Bot',
-      content: '不客气，有任何问题随时联系我。',
-      time: '10:11',
+      time: getCurrentTime(),
       isMe: false,
       avatar: aiAvatar
     }
   ])
 
-  const messageId = ref(10) // 用于生成唯一的消息ID
+  const messageId = ref(2)
+  const userAvatar = ref(meAvatar)
+  const messageContainer = ref<HTMLElement | null>(null)
 
-  const userAvatar = ref(meAvatar) // 使用导入的头像
-
-  // 发送消息
-  const sendMessage = () => {
+  const sendMessage = async () => {
     const text = messageText.value.trim()
-    if (!text) return
+    if (!text || isLoading.value) return
 
+    // 添加用户消息
+    addUserMessage(text)
+    messageText.value = ''
+    scrollToBottom()
+
+    try {
+      isLoading.value = true
+      isOnline.value = true
+
+      // 构建对话历史
+      const history = messages.value.map((msg) => ({
+        role: msg.isMe ? 'user' : 'assistant',
+        content: msg.content
+      }))
+
+      // API请求
+      const response = await axios.post(
+        apiUrl,
+        {
+          model: 'deepseek-chat',
+          messages: [...history, { role: 'user', content: text }],
+          temperature: 0.7,
+          max_tokens: 1000
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+
+      // 处理响应
+      const aiResponse = response.data.choices[0].message.content
+      addBotMessage(aiResponse)
+    } catch (error) {
+      console.error('API调用失败:', error)
+      addErrorMessage()
+      isOnline.value = false
+    } finally {
+      isLoading.value = false
+      scrollToBottom()
+    }
+  }
+
+  const addUserMessage = (text: string) => {
     messages.value.push({
       id: messageId.value++,
       sender: 'Ricky',
       content: text,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: getCurrentTime(),
       isMe: true,
       avatar: userAvatar.value
     })
-
-    messageText.value = ''
-    scrollToBottom()
   }
 
-  // 滚动到底部
-  const messageContainer = ref<HTMLElement | null>(null)
+  const addBotMessage = (text: string) => {
+    messages.value.push({
+      id: messageId.value++,
+      sender: 'Art Bot',
+      content: text,
+      time: getCurrentTime(),
+      isMe: false,
+      avatar: aiAvatar
+    })
+  }
+
+  const addErrorMessage = () => {
+    messages.value.push({
+      id: messageId.value++,
+      sender: 'System',
+      content: '暂时无法连接到AI服务，请稍后再试',
+      time: getCurrentTime(),
+      isMe: false,
+      avatar: aiAvatar
+    })
+  }
+
   const scrollToBottom = () => {
     setTimeout(() => {
       if (messageContainer.value) {
@@ -350,7 +369,7 @@
     }
 
     .chat-input {
-      padding: 16px; // 增加填充以提升输入区域的布局
+      padding: 16px;
 
       .input-actions {
         display: flex;
@@ -360,7 +379,7 @@
 
       .chat-input-actions {
         display: flex;
-        align-items: center; // 修正为单数
+        align-items: center;
         justify-content: space-between;
         margin-top: 12px;
 
@@ -376,11 +395,36 @@
           }
         }
 
-        // 确保发送按钮与输入框对齐
         el-button {
           min-width: 80px;
         }
       }
+    }
+  }
+
+  .loading-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    color: #666;
+    font-size: 14px;
+    background: #f5f7fa;
+    border-radius: 4px;
+    margin: 8px 16px;
+    transition: all 0.3s;
+
+    .is-loading {
+      animation: rotating 2s linear infinite;
+    }
+  }
+
+  @keyframes rotating {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
     }
   }
 
@@ -401,6 +445,11 @@
           }
         }
       }
+    }
+
+    .loading-indicator {
+      background: #2c2c2c;
+      color: #aaa;
     }
   }
 </style>

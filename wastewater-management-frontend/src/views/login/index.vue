@@ -138,10 +138,15 @@
 
   const systemName = SystemInfo.name
   const formRef = ref<FormInstance>()
+  // 使用localStorage获取保存的用户信息
+  const savedUsername = localStorage.getItem('username')
+  const savedPassword = localStorage.getItem('password')
+  const isRememberPassword = localStorage.getItem('rememberPassword') === 'true'
+
   const formData = reactive({
-    username: SystemInfo.login.username,
-    password: SystemInfo.login.password,
-    rememberPassword: true
+    username: savedUsername || '', // 如果有保存的用户名则使用，否则为空
+    password: savedPassword || '', // 如果有保存的密码则使用，否则为空
+    rememberPassword: isRememberPassword // 根据保存的状态设置记住密码的勾选
   })
 
   const rules = computed<FormRules>(() => ({
@@ -156,7 +161,7 @@
   const isDark = computed(() => store.isDark)
 
   const onPass = () => {}
-
+  // 延时辅助函数
   const handleSubmit = async () => {
     if (!formRef.value) return
 
@@ -173,16 +178,23 @@
         const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
         try {
-          const res = await UserService.mockLogin({
-            body: JSON.stringify({
-              username: formData.username,
-              password: formData.password
-            })
+          const res = await UserService.login({
+            username: formData.username,
+            password: formData.password
           })
 
           if (res.code === ApiStatus.success && res.data) {
             userStore.setUserInfo(res.data)
             userStore.setLoginStatus(true)
+            if (formData.rememberPassword) {
+              localStorage.setItem('username', formData.username)
+              localStorage.setItem('password', formData.password)
+              localStorage.setItem('rememberPassword', 'ture')
+            } else {
+              localStorage.removeItem('username')
+              localStorage.removeItem('password')
+              localStorage.removeItem('rememberPassword')
+            }
             await delay(1000)
             showLoginSuccessNotice()
             router.push(HOME_PAGE)
