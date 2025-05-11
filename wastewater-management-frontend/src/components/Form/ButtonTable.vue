@@ -1,4 +1,3 @@
-<!-- 表格按钮，支持文字和图标 -->
 <template>
   <div :class="['btn-text', `btn-${props.type}`, useColor ? buttonColor : '']" @click="handleClick">
     <i v-if="props.type" class="iconfont-sys" v-html="getIcon(props.type)"></i>
@@ -9,11 +8,13 @@
 <script setup lang="ts">
   import { computed } from 'vue'
 
+  type ButtonType = 'add' | 'edit' | 'delete' | 'more' | 'reset'
+
   const props = withDefaults(
     defineProps<{
       text?: string
       icon?: string
-      type?: 'add' | 'edit' | 'delete' | 'more'
+      type?: ButtonType
       buttonClass?: string
       useColor?: boolean
     }>(),
@@ -30,14 +31,15 @@
     { type: 'add', icon: '&#xe602;', color: 'bg-primary' },
     { type: 'edit', icon: '&#xe642;', color: 'bg-secondary' },
     { type: 'delete', icon: '&#xe783;', color: 'bg-error' },
-    { type: 'more', icon: '&#xe6df;', color: '' }
+    { type: 'more', icon: '&#xe6df;', color: '' },
+    { type: 'reset', icon: '&#xe817;', color: 'bg-warning-light' } // 重置按钮（淡黄）
   ] as const
 
-  const getIcon = (type: 'add' | 'edit' | 'delete' | 'more') => {
+  const getIcon = (type: ButtonType) => {
     return defaultButtons.find((btn) => btn.type === type)?.icon
   }
 
-  const getButtonColor = (type: 'add' | 'edit' | 'delete' | 'more') => {
+  const getButtonColor = (type: ButtonType) => {
     return defaultButtons.find((btn) => btn.type === type)?.color
   }
 
@@ -68,6 +70,17 @@
     &:hover {
       color: var(--main-color);
       background-color: rgba(var(--art-gray-300-rgb), 0.5);
+    }
+  }
+
+  // 自定义 reset 类型按钮颜色
+  .btn-reset {
+    background-color: #fff6d5; // 淡黄色
+    color: #8a6d3b;
+
+    &:hover {
+      background-color: #ffeeba;
+      color: #7c5f27;
     }
   }
 </style>

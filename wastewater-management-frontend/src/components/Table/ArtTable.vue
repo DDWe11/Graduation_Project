@@ -117,7 +117,7 @@
     total: 0,
     currentPage: 1,
     pageSize: 10,
-    hideOnSinglePage: true,
+    hideOnSinglePage: false,
     pageSizes: () => [10, 20, 30, 50],
     paginationAlign: 'center',
     paginationSize: 'default',

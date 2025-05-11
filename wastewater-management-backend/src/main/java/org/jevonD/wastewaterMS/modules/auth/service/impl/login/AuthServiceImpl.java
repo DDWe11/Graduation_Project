@@ -1,12 +1,15 @@
 package org.jevonD.wastewaterMS.modules.auth.service.impl.login;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import org.jevonD.wastewaterMS.common.utils.TimeUtils;
 import org.jevonD.wastewaterMS.modules.auth.dto.login.LoginReq;
 import org.jevonD.wastewaterMS.modules.auth.dto.login.LoginResp;
 import org.jevonD.wastewaterMS.modules.auth.entity.SysUser;
 import org.jevonD.wastewaterMS.modules.auth.entity.SysRole;
+import org.jevonD.wastewaterMS.modules.auth.entity.SysUserInfo;
 import org.jevonD.wastewaterMS.modules.auth.entity.SysUserRole;
 import org.jevonD.wastewaterMS.modules.auth.repository.SysRoleRepository;
+import org.jevonD.wastewaterMS.modules.auth.repository.SysUserInfoRepository;
 import org.jevonD.wastewaterMS.modules.auth.repository.SysUserRepository;
 import org.jevonD.wastewaterMS.modules.auth.repository.SysUserRoleRepository;
 import org.jevonD.wastewaterMS.modules.auth.service.AuthService;
@@ -29,6 +32,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private SysUserRoleRepository userRoleRepository;
+
+    @Autowired
+    private SysUserInfoRepository userInfoRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -66,11 +72,15 @@ public class AuthServiceImpl implements AuthService {
             throw new AuthException("角色信息不存在");
         }
 
+        // 获取用户姓名
+        SysUserInfo userInfo = userInfoRepository.selectById(user.getId());
+        String realName = (userInfo != null) ? userInfo.getRealName() : "";
+
         // 生成 JWT Token
         String token = jwtUtils.generateToken(user.getUsername());
 
         // 获取当前时间
-        LocalDateTime currentTime = LocalDateTime.now();
+        LocalDateTime currentTime = TimeUtils.nowBeijing();
 
         // 在更新数据库前，将当前的 login_time 存入 last_login_time，并将 currentTime 作为新的 login_time
         userRepository.updateLoginInfo(user.getId(), currentTime, req.getLastLoginIp());
@@ -80,6 +90,7 @@ public class AuthServiceImpl implements AuthService {
                 .token(token)
                 .username(user.getUsername())
                 .roleCode(role.getRoleCode())
+                .realName(realName)
                 .loginTime(currentTime)
                 .build();
     }

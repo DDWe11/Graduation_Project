@@ -34,7 +34,7 @@ axiosInstance.interceptors.request.use(
     if (token) {
       request.headers.set({
         'Content-Type': 'application/json',
-        Authorization: token
+        Authorization: `Bearer ${token}`
       })
     }
 
@@ -93,8 +93,11 @@ const api = {
   put<T>(config: AxiosRequestConfig): Promise<T> {
     return request({ ...config, method: 'PUT' }) // PUT 请求
   },
-  del<T>(config: AxiosRequestConfig): Promise<T> {
+  delete<T>(config: AxiosRequestConfig): Promise<T> {
     return request({ ...config, method: 'DELETE' }) // DELETE 请求
+  },
+  patch<T>(config: AxiosRequestConfig): Promise<T> {
+    return request({ ...config, method: 'PATCH' })
   }
 }
 

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.jevonD.wastewaterMS.common.utils.TimeUtils;
 import org.jevonD.wastewaterMS.modules.auth.dto.admin.*;
 import org.jevonD.wastewaterMS.modules.auth.entity.SysRole;
 import org.jevonD.wastewaterMS.modules.auth.entity.SysUser;
@@ -24,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,50 +54,73 @@ public class AdminUserServiceImpl extends ServiceImpl<SysUserRepository, SysUser
     @Override
     @Transactional(rollbackFor = Exception.class)
     public SysUser createUser(AdminCreateReq req) {
-        // 校验用户名唯一
         if (userRepository.findByUsername(req.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username already exists");
         }
-        // 查询当前最大 ID
-        Long maxId = userRepository.selectMaxId();
-        Long newUserId = (maxId == null) ? 1L : maxId + 1; // 确保 ID 连续递增
 
-        // 创建用户主体
+        Long maxId = userRepository.selectMaxId();
+        Long newUserId = (maxId == null) ? 1L : maxId + 1;
+
         SysUser user = new SysUser();
         user.setId(newUserId);
         user.setUsername(req.getUsername());
-        user.setPassword(passwordEncoder.encode(req.getPassword()));
+        user.setPassword(passwordEncoder.encode(defaultPassword));  // 使用默认密码
         user.setStatus(UserStatus.ENABLED);
-        user.setCreateTime(LocalDateTime.now());
-        userRepository.insert(user);  // 保存用户主体
+        user.setCreateTime(TimeUtils.nowBeijing());
+        userRepository.insert(user);
 
-        // 创建用户信息
         SysUserInfo userInfo = new SysUserInfo();
         userInfo.setUserId(newUserId);
         userInfo.setRealName(req.getReal_name());
-        userInfo.setGender(Gender.fromCode(req.getGender()));   // 转换为 Gender 枚举
-        userInfo.setDepartment(Department.valueOf(req.getDepartment().toUpperCase()));  // 转换为 Department 枚举
+
+        String genderCode;
+        if ("MALE".equalsIgnoreCase(req.getGender())) {
+            genderCode = "M";
+        } else if ("FEMALE".equalsIgnoreCase(req.getGender())) {
+            genderCode = "F";
+        } else {
+            throw new IllegalArgumentException("Invalid gender value: " + req.getGender());
+        }
+        userInfo.setGender(Gender.fromCode(genderCode));
+        userInfo.setDepartment(Department.valueOf(req.getDepartment().toUpperCase()));
         userInfo.setPosition(req.getPosition());
         userInfo.setEntryDate(req.getEntry_date());
-        userInfo.setJobNumber(generateJobNumber(req.getDepartment()));  // 生成工号
-        userInfoRepository.insert(userInfo);  // 保存用户信息
+        userInfo.setJobNumber(generateJobNumber(req.getDepartment()));
+        userInfo.setPhone(req.getPhone());
+        if (req.getEmail() != null) userInfo.setEmail(req.getEmail());
+        if (req.getEmergencyContact() != null) userInfo.setEmergencyContact(req.getEmergencyContact());
+        if (req.getEmergencyPhone() != null) userInfo.setEmergencyPhone(req.getEmergencyPhone());
+        userInfoRepository.insert(userInfo);
 
-        Long roleId = req.getRoleid();
-        // 分配角色
+        SysRole role = roleRepository.selectOne(
+                new QueryWrapper<SysRole>().eq("role_code", req.getRoleCode())
+        );
+        if (role == null) {
+            throw new IllegalArgumentException("Invalid role code: " + req.getRoleCode());
+        }
+
         SysUserRole userRole = new SysUserRole();
         userRole.setUserId(newUserId);
-        userRole.setRoleId(roleId);
-        userRoleRepository.insert(userRole);  // 保存用户角色
+        userRole.setRoleId(role.getId());
+        userRoleRepository.insert(userRole);
+
         return user;
     }
 
-    private String generateJobNumber(String department) {
-        // 生成规则：部门代码+年月+序号（示例：YXB-202311-001）
-        String prefix = department.substring(0, 3).toUpperCase();
-        String datePart = LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMM"));
-        String sequence = String.format("%03d", userInfoRepository.countByDepartment(department) + 1);
-        return prefix + "-" + datePart + "-" + sequence;
-    }
+//    private String generateJobNumber(String department) {
+//        // 生成规则：部门代码+年月+序号（示例：YXB-202311-001）
+//        String prefix = department.substring(0, 3).toUpperCase();
+//        String datePart = TimeUtils.nowBeijing().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMM"));
+//        String sequence = String.format("%03d", userInfoRepository.countByDepartment(department) + 1);
+//        return prefix + "-" + datePart + "-" + sequence;
+//    }
+private String generateJobNumber(String departmentName) {
+    Department dept = Department.fromChinese(departmentName);
+    String prefix = dept.getShortCode();  // 使用枚举获取正确的部门简写
+    String datePart = TimeUtils.nowBeijing().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+    String sequence = String.format("%03d", userInfoRepository.countByDepartment(departmentName) + 1);
+    return prefix + datePart + sequence;
+}
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -145,12 +170,12 @@ public class AdminUserServiceImpl extends ServiceImpl<SysUserRepository, SysUser
         }
         SysUserRole existingUserRole = userRoleRepository.selectOne(new QueryWrapper<SysUserRole>().eq("user_id", userId));
         if (existingUserRole != null) {
-            existingUserRole.setRoleId(Long.valueOf(role.getId()));
+            existingUserRole.setRoleId(role.getId());
             userRoleRepository.updateById(existingUserRole);
         } else {
             SysUserRole newUserRole = new SysUserRole();
             newUserRole.setUserId(userId);
-            newUserRole.setRoleId(Long.valueOf(role.getId()));
+            newUserRole.setRoleId(role.getId());
             userRoleRepository.insert(newUserRole);
         }
     }
@@ -193,34 +218,44 @@ public class AdminUserServiceImpl extends ServiceImpl<SysUserRepository, SysUser
         Page<SysUser> pageInfo = new Page<>(page, size);
         QueryWrapper<SysUser> wrapper = new QueryWrapper<>();
 
-        // 按 username 筛选
         if (queryReq.getUsername() != null && !queryReq.getUsername().isEmpty()) {
             wrapper.eq("username", queryReq.getUsername());
         }
 
-        // 按状态筛选
         if (queryReq.getStatus() != null) {
             wrapper.eq("status", queryReq.getStatus());
         }
 
-        // 按部门筛选（需要关联 sys_user_info）
         if (queryReq.getDepartment() != null && !queryReq.getDepartment().isEmpty()) {
-            wrapper.inSql("id", "SELECT user_id FROM sys_user_info WHERE department = '" + queryReq.getDepartment() + "'");
+            wrapper.inSql("id",
+                    "SELECT user_id FROM sys_user_info WHERE department = '" + queryReq.getDepartment() + "'");
         }
 
-        // 按角色筛选（需要关联 sys_user_role）
         if (queryReq.getRoleCode() != null && !queryReq.getRoleCode().isEmpty()) {
-            wrapper.inSql("id", "SELECT user_id FROM sys_user_role ur JOIN sys_role r ON ur.role_id = r.id WHERE r.role_code = '" + queryReq.getRoleCode() + "'");
+            wrapper.inSql("id",
+                    "SELECT user_id FROM sys_user_role ur JOIN sys_role r ON ur.role_id = r.id " +
+                            "WHERE r.role_code = '" + queryReq.getRoleCode() + "'");
+        }
+
+        if (queryReq.getPhone() != null && !queryReq.getPhone().isEmpty()) {
+            wrapper.inSql("id",
+                    "SELECT user_id FROM sys_user_info WHERE phone = '" + queryReq.getPhone() + "'");
+        }
+
+        if (queryReq.getRealName() != null && !queryReq.getRealName().isEmpty()) {
+            wrapper.inSql("id",
+                    "SELECT user_id FROM sys_user_info WHERE real_name LIKE '%" + queryReq.getRealName() + "%'");
         }
 
         Page<SysUser> userPage = userRepository.selectPage(pageInfo, wrapper);
 
-        // 构造返回结果
+        // 构造返回数据
         AdminQueryResp response = new AdminQueryResp();
         response.setTotal((int) userPage.getTotal());
         List<AdminQueryResp.UserInfo> userInfos = userPage.getRecords().stream().map(user -> {
             SysUserInfo userInfo = userInfoRepository.selectById(user.getId());
-            SysUserRole userRole = userRoleRepository.selectOne(new QueryWrapper<SysUserRole>().eq("user_id", user.getId()));
+            SysUserRole userRole = userRoleRepository.selectOne(
+                    new QueryWrapper<SysUserRole>().eq("user_id", user.getId()));
             SysRole role = roleRepository.selectById(userRole.getRoleId());
 
             AdminQueryResp.UserInfo info = new AdminQueryResp.UserInfo();
@@ -240,6 +275,7 @@ public class AdminUserServiceImpl extends ServiceImpl<SysUserRepository, SysUser
             info.setEntryDate(userInfo.getEntryDate());
             return info;
         }).collect(Collectors.toList());
+
         response.setUsers(userInfos);
         return response;
     }
@@ -290,13 +326,13 @@ public class AdminUserServiceImpl extends ServiceImpl<SysUserRepository, SysUser
 
             if (userRole != null) {
                 // **如果已有角色，执行更新**
-                userRole.setRoleId(Long.valueOf(role.getId()));
+                userRole.setRoleId(role.getId());
                 userRoleRepository.updateById(userRole);
             } else {
                 // **如果没有角色，执行插入**
                 userRole = new SysUserRole();
                 userRole.setUserId(req.getUserId());
-                userRole.setRoleId(Long.valueOf(role.getId()));
+                userRole.setRoleId(role.getId());
                 userRoleRepository.insert(userRole);
             }
             roleCode = req.getRoleCode(); // 赋值新的 roleCode

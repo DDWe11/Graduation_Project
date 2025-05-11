@@ -14,7 +14,8 @@ export default ({ mode }) => {
   const env = loadEnv(mode, root)
   const { VITE_VERSION, VITE_PORT, VITE_BASE_URL, VITE_API_URL } = env
 
-  console.log(`🚀 API_URL = ${VITE_API_URL}`)
+  console.log(`🚀 FRONTEND_RUNNING_AT = http://localhost:${VITE_PORT}`)
+  console.log(`🚀 API_PROXY_TARGET = ${VITE_API_URL}`)
   console.log(`🚀 VERSION = ${VITE_VERSION}`)
 
   return defineConfig({
@@ -26,7 +27,7 @@ export default ({ mode }) => {
       port: parseInt(VITE_PORT),
       proxy: {
         '/api': {
-          target: VITE_API_URL,
+          target: 'VITE_API_URL',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, '')
         }

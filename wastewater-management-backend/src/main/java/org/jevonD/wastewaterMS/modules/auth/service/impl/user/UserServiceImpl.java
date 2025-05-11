@@ -1,6 +1,7 @@
 package org.jevonD.wastewaterMS.modules.auth.service.impl.user;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import org.jevonD.wastewaterMS.common.utils.TimeUtils;
 import org.jevonD.wastewaterMS.modules.auth.entity.SysRole;
 import org.jevonD.wastewaterMS.modules.auth.entity.SysUserInfo;
 import org.jevonD.wastewaterMS.modules.auth.entity.SysUserRole;
@@ -125,7 +126,7 @@ public class UserServiceImpl implements UserService {
                 .success(true)
                 .errorCode(null)
                 .errorMessage(null)
-                .timestamp(LocalDateTime.now()) // 确保时间戳正确生成
+                .timestamp(TimeUtils.nowBeijing()) // 确保时间戳正确生成
                 .build();
     }
 
@@ -134,7 +135,7 @@ public class UserServiceImpl implements UserService {
                 .success(false)
                 .errorCode("400")
                 .errorMessage(message)
-                .timestamp(LocalDateTime.now())
+                .timestamp(TimeUtils.nowBeijing())
                 .build();
     }
     @Override
