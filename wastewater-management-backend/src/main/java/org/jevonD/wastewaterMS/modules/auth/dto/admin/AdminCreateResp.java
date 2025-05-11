@@ -22,6 +22,10 @@ public class AdminCreateResp {
         private Department department;     // 部门
         private String position;
         private String roleCode;  // 角色代码，例如：SUPERVISOR
+        private String phone;                // 手机号（可选）
+        private String email;                // 邮箱（可选）
+        private String emergencyContact;     // 紧急联系人（可选）
+        private String emergencyPhone;       // 紧急联系电话（可选）
         private LocalDateTime entry_time;
     }
 }

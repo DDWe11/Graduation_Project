@@ -10,5 +10,5 @@ public class SysUserRole {
 
     @TableId
     private Long userId;
-    private Long roleId;
+    private Integer roleId;
 }
