@@ -10,7 +10,7 @@
       <template #top>
         <el-form :model="searchForm" ref="searchFormRef" label-width="82px">
           <el-row :gutter="20">
-            <form-input label="用户名" prop="name" v-model="searchForm.username" />
+            <form-input label="用户名" prop="username" v-model="searchForm.username" />
             <form-input label="姓名" prop="realName" v-model="searchForm.realName" />
             <form-input label="手机号" prop="phone" v-model="searchForm.phone" />
             <form-select
@@ -328,6 +328,7 @@
 
   const reset = () => {
     resetForm(searchFormRef.value)
+    currentPage.value = 1
     fetchUserListWithParams({}) // 清空筛选条件，请求全部用户
   }
   const tableData = ref<any[]>([])
@@ -405,7 +406,8 @@
         await api.delete({ url: `/auth/admin/users/${userId}` })
         ElMessage.success('注销成功')
         // 局部刷新：从 tableData 中移除对应用户
-        tableData.value = tableData.value.filter((item) => item.userId !== userId)
+        // tableData.value = tableData.value.filter((item) => item.userId !== userId)
+        search()
       } catch (error) {
         console.error('删除失败:', error)
         ElMessage.error('删除失败，请重试')
@@ -446,7 +448,11 @@
     try {
       const response = await api.get<UserListResponse>({
         url: '/auth/admin/users',
-        params
+        params: {
+          ...params,
+          page: currentPage.value,
+          size: pageSize.value
+        }
       })
 
       if (response.code === 200) {
@@ -525,10 +531,9 @@
       if (valid) {
         const payload = {
           username: formData.username,
-          // password: formData.password,
           status: formData.status,
           real_name: formData.realName,
-          gender: formData.gender, // 注意：这里直接传 MALE / FEMALE
+          gender: formData.gender,
           department: formData.department,
           position: formData.position,
           roleCode: formData.roleCode,
@@ -541,14 +546,16 @@
 
         try {
           if (dialogType.value === 'add') {
-            // 添加用户
             await api.post({
               url: '/auth/admin/users',
               params: payload
             })
             ElMessage.success('添加成功')
+
+            // 自动跳转到新数据所在的最后一页
+            const newTotal = total.value + 1
+            currentPage.value = Math.ceil(newTotal / pageSize.value)
           } else if (dialogType.value === 'edit') {
-            // 修改用户（需要带 userId）
             await api.patch({
               url: '/auth/admin/users/update',
               data: {
@@ -563,16 +570,7 @@
           }
 
           dialogVisible.value = false
-
-          // 刷新列表：重新拉取后端数据
-          const response = await api.get<UserListResponse>({
-            url: '/auth/admin/users'
-          })
-          if (response.code === 200) {
-            tableData.value = response.data.users
-          } else {
-            ElMessage.error('刷新列表失败，请手动刷新')
-          }
+          search() // 保留筛选并刷新
         } catch (error) {
           ElMessage.error('操作失败，请重试')
           console.error(error)
