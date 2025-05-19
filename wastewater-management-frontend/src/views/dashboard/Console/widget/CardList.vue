@@ -46,7 +46,7 @@
       icon: '&#xe7aa;',
       startVal: 0,
       duration: 1000,
-      num: 9520,
+      num: 900,
       change: '-12%'
     },
     {

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.jevonD.wastewaterMS.modules.sensor.repository.SensorDeviceRepository">
+
+    <!-- 根据一组ID批量查询设备信息 -->
+    <select id="findDevicesByIds"
+            parameterType="java.util.Collection"
+            resultType="org.jevonD.wastewaterMS.modules.sensor.entity.SensorDevice">
+        SELECT *
+        FROM sensor_device
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <!-- 查询未绑定任何工艺的传感器ID -->
+    <select id="findUnboundSensorIds"
+            resultType="long">
+        SELECT sd.id
+        FROM sensor_device sd
+        WHERE sd.status = 1
+          AND sd.id NOT IN (
+            SELECT sensor_id FROM process_sensor_bind
+        )
+    </select>
+
+    <!-- 复杂条件查询设备（类型、状态、ID范围） -->
+    <select id="findByIdsAndTypeAndState"
+            parameterType="map"
+            resultType="org.jevonD.wastewaterMS.modules.sensor.entity.SensorDevice">
+        SELECT d.*
+        FROM sensor_device d
+        LEFT JOIN sensor_type t ON d.type_id = t.id
+        <where>
+            <if test="sensorIds != null and sensorIds.size() > 0">
+                d.id IN
+                <foreach collection="sensorIds" item="id" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="sensorTypeCode != null and sensorTypeCode != ''">
+                AND t.code = #{sensorTypeCode}
+            </if>
+            <if test="deviceState != null">
+                AND d.device_state = #{deviceState}
+            </if>
+        </where>
+    </select>
+
+    <!-- 你可根据需要继续添加其它查询、更新等SQL语句 -->
+
+</mapper>

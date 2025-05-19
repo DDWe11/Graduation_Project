@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.jevonD.wastewaterMS.modules.data.repository.SensorDataRepository">
+    <insert id="insertBatch">
+        INSERT INTO sensor_data (sensor_id, value, timestamp, unit, remark, alarm_flag)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.sensorId}, #{item.value}, #{item.timestamp}, #{item.unit}, NULL, #{item.alarmFlag})
+        </foreach>
+    </insert>
+    <select id="findPageByConditions" resultType="org.jevonD.wastewaterMS.modules.data.entity.SensorData">
+        SELECT *
+        FROM sensor_data
+        <where>
+            <if test="sensorIds != null and sensorIds.size() > 0">
+                sensor_id IN
+                <foreach collection="sensorIds" item="id" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="alarmFlag != null">
+                AND alarm_flag = #{alarmFlag}
+            </if>
+            <if test="startTime != null">
+                AND timestamp &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND timestamp &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY timestamp DESC
+    </select>
+</mapper>
+
