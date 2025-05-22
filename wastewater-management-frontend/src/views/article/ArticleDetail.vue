@@ -4,16 +4,17 @@
       <h1>{{ articleTitle }}</h1>
       <div class="markdown-body" v-highlight v-html="articleHtml"></div>
     </div>
-    <BackToTop />
+    <ArtBackToTop />
   </div>
 </template>
 
 <script setup lang="ts">
   import '@/assets/styles/markdown.scss'
   import '@/assets/styles/one-dark-pro.scss'
+  import { useCommon } from '@/composables/useCommon'
   import { ApiStatus } from '@/utils/http/status'
-  import BackToTop from '@comps/Widgets/BackToTop.vue'
   import axios from 'axios'
+
   // import 'highlight.js/styles/atom-one-dark.css';
   // import 'highlight.js/styles/vs2015.css';
   // import { ArticleService } from '@/api/articleApi'
@@ -24,7 +25,7 @@
   const articleHtml = ref('')
 
   onMounted(() => {
-    scrollToTop()
+    useCommon().scrollToTop()
     articleId.value = Number(router.query.id)
     getArticleDetail()
   })
@@ -43,10 +44,6 @@
       //   articleHtml.value = res.data.html_content;
       // }
     }
-  }
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 </script>
 

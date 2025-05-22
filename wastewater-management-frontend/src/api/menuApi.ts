@@ -1,32 +1,25 @@
-import { fourDotsSpinnerSvg } from '@/assets/svg/loading'
-import { asyncRoutes } from '@/router/modules/asyncRoutes'
+import { asyncRoutes } from '@/router/routes/asyncRoutes'
+import { menuDataToRouter } from '@/router/utils/menuToRouter'
 import { MenuListType } from '@/types/menu'
-import { processRoute } from '@/utils/menu'
-import { ElLoading } from 'element-plus'
+
+interface MenuResponse {
+  menuList: MenuListType[]
+}
 
 // 菜单接口
 export const menuService = {
-  // 获取菜单列表，模拟网络请求
-  getMenuList(
-    delay: number = 300
-  ): Promise<{ menuList: MenuListType[]; closeLoading: () => void }> {
-    // 生成菜单数据
-    const menuData: MenuListType[] = asyncRoutes.map((route) => processRoute(route))
+  async getMenuList(delay = 300): Promise<MenuResponse> {
+    try {
+      // 模拟接口返回的菜单数据
+      const menuData = asyncRoutes
+      // 处理菜单数据
+      const menuList = menuData.map((route) => menuDataToRouter(route))
+      // 模拟接口延迟
+      await new Promise((resolve) => setTimeout(resolve, delay))
 
-    const loading = ElLoading.service({
-      lock: true,
-      background: 'rgba(0, 0, 0, 0)',
-      svg: fourDotsSpinnerSvg,
-      svgViewBox: '0 0 40 40'
-    })
-
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          menuList: menuData,
-          closeLoading: () => loading.close()
-        })
-      }, delay)
-    })
+      return { menuList }
+    } catch (error) {
+      throw error instanceof Error ? error : new Error('获取菜单失败')
+    }
   }
 }

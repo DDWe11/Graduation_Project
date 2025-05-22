@@ -1,13 +1,11 @@
 <template>
   <div class="login register">
     <div class="left-wrap">
-      <left-view></left-view>
+      <LoginLeftView></LoginLeftView>
     </div>
     <div class="right-wrap">
       <div class="header">
-        <svg class="icon" aria-hidden="true">
-          <use xlink:href="#iconsys-zhaopian-copy"></use>
-        </svg>
+        <ArtLogo class="icon" />
         <h1>{{ systemName }}</h1>
       </div>
       <div class="login-wrap">
@@ -16,17 +14,12 @@
           <p class="sub-title">{{ $t('forgetPassword.subTitle') }}</p>
           <div class="input-wrap">
             <span class="input-label" v-if="showInputLabel">账号</span>
-            <el-input
-              :placeholder="$t('forgetPassword.placeholder')"
-              size="large"
-              v-model.trim="username"
-            />
+            <el-input :placeholder="$t('forgetPassword.placeholder')" v-model.trim="username" />
           </div>
 
           <div style="margin-top: 15px">
             <el-button
               class="login-btn"
-              size="large"
               type="primary"
               @click="register"
               :loading="loading"
@@ -37,7 +30,7 @@
           </div>
 
           <div style="margin-top: 15px">
-            <el-button style="width: 100%; height: 46px" size="large" plain @click="toLogin">
+            <el-button class="back-btn" plain @click="toLogin">
               {{ $t('forgetPassword.backBtnText') }}
             </el-button>
           </div>
@@ -48,12 +41,11 @@
 </template>
 
 <script setup lang="ts">
-  import { SystemInfo } from '@/config/setting'
-  import LeftView from '@/components/Pages/Login/LeftView.vue'
+  import AppConfig from '@/config'
   const router = useRouter()
   const showInputLabel = ref(false)
 
-  const systemName = SystemInfo.name
+  const systemName = AppConfig.systemInfo.name
   const username = ref('')
   const loading = ref(false)
 

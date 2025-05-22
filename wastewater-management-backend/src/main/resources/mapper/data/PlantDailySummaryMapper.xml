@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper>
+    <select id="findPageByConditions" resultType="org.jevonD.wastewaterMS.modules.data.entity.PlantDailySummary">
+        SELECT * FROM plant_daily_summary
+        <where>
+            <if test="startDate != null">
+                AND record_date &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND record_date &lt;= #{endDate}
+            </if>
+            <if test="minEmission != null">
+                AND total_emission &gt;= #{minEmission}
+            </if>
+            <if test="maxEmission != null">
+                AND total_emission &lt;= #{maxEmission}
+            </if>
+        </where>
+        ORDER BY record_date DESC
+    </select>
+</mapper>

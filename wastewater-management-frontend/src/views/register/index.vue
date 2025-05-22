@@ -1,13 +1,11 @@
 <template>
   <div class="login register">
     <div class="left-wrap">
-      <left-view></left-view>
+      <LoginLeftView></LoginLeftView>
     </div>
     <div class="right-wrap">
       <div class="header">
-        <svg class="icon" aria-hidden="true">
-          <use xlink:href="#iconsys-zhaopian-copy"></use>
-        </svg>
+        <ArtLogo class="icon" />
         <h1>{{ systemName }}</h1>
       </div>
       <div class="login-wrap">
@@ -19,7 +17,6 @@
               <el-input
                 v-model.trim="formData.username"
                 :placeholder="$t('register.placeholder[0]')"
-                size="large"
               />
             </el-form-item>
 
@@ -27,7 +24,6 @@
               <el-input
                 v-model.trim="formData.password"
                 :placeholder="$t('register.placeholder[1]')"
-                size="large"
                 type="password"
                 autocomplete="off"
               />
@@ -37,7 +33,6 @@
               <el-input
                 v-model.trim="formData.confirmPassword"
                 :placeholder="$t('register.placeholder[2]')"
-                size="large"
                 type="password"
                 autocomplete="off"
                 @keyup.enter="register"
@@ -58,7 +53,6 @@
             <div style="margin-top: 15px">
               <el-button
                 class="register-btn"
-                size="large"
                 type="primary"
                 @click="register"
                 :loading="loading"
@@ -82,8 +76,7 @@
 </template>
 
 <script setup lang="ts">
-  import LeftView from '@/components/Pages/Login/LeftView.vue'
-  import { SystemInfo } from '@/config/setting'
+  import AppConfig from '@/config'
   import { ElMessage } from 'element-plus'
   import type { FormInstance, FormRules } from 'element-plus'
   import { useI18n } from 'vue-i18n'
@@ -93,7 +86,7 @@
   const router = useRouter()
   const formRef = ref<FormInstance>()
 
-  const systemName = SystemInfo.name
+  const systemName = AppConfig.systemInfo.name
   const loading = ref(false)
 
   const formData = reactive({

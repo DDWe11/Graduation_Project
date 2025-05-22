@@ -2,11 +2,10 @@ import { MenuThemeEnum, SystemThemeEnum } from '@/enums/appEnum'
 
 // 用户信息
 export interface UserInfo {
-  token: string
-  username: string
-  realName: string
-  roleCode: string
-  loginTime: string
+  userId: number // 用户ID
+  userName: string // 用户名
+  roles: string[] // 角色
+  buttons: string[] // 按钮
 }
 
 // 系统主题样式（light | dark）
@@ -32,6 +31,7 @@ export interface MenuThemeType {
   systemBackground: string // 系统背景色
   leftLineColor: string // 左侧线条颜色
   rightLineColor: string // 右侧线条颜色
+  img?: string // 图片
 }
 
 // 设置中心

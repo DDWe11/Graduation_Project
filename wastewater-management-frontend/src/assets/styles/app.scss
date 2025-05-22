@@ -104,14 +104,21 @@
   }
 }
 
+// 盒子默认边框
+.page-content,
+.art-custom-card {
+  border: 1px solid var(--art-card-border) !important;
+}
+
 // 盒子边框
 [data-box-mode='border-mode'] {
   .page-content,
-  .art-custom-card {
+  .art-custom-card,
+  .art-table-card {
     border: 1px solid var(--art-card-border) !important;
   }
 
-  .menu-left {
+  .layout-sidebar {
     border-right: 1px solid var(--art-card-border) !important;
   }
 }
@@ -119,12 +126,52 @@
 // 盒子阴影
 [data-box-mode='shadow-mode'] {
   .page-content,
-  .art-custom-card {
+  .art-custom-card,
+  .art-table-card {
     box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.04) !important;
     border: 1px solid rgba(var(--art-gray-300-rgb), 0.3) !important;
   }
 
-  .menu-left {
+  .layout-sidebar {
     border-right: 1px solid rgba(var(--art-gray-300-rgb), 0.4) !important;
+  }
+}
+
+html,
+body {
+  touch-action: none; /* 禁用触摸事件 */
+  overflow-x: hidden; /* 禁用横向滚动 */
+}
+
+// 元素全屏
+.el-full-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 500;
+  margin-top: 0;
+  padding: 15px;
+  box-sizing: border-box;
+  background-color: var(--art-main-bg-color);
+
+  .art-table-full-screen {
+    height: 100% !important;
+  }
+}
+
+// 表格卡片
+.art-table-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-top: 15px;
+  border-radius: calc(var(--custom-radius) / 2 + 2px) !important;
+
+  .el-card__body {
+    height: 100%;
+    overflow: hidden;
   }
 }

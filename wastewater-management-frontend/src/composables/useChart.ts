@@ -1,9 +1,7 @@
-import { onMounted, onUnmounted, ref, computed } from 'vue'
 import * as echarts from 'echarts'
 import type { EChartsOption } from 'echarts'
 import { useSettingStore } from '@/store/modules/setting'
-import { SystemThemeEnum } from '@/enums/appEnum'
-import { getCssVariable } from '@/utils/utils'
+import { getCssVariable } from '@/utils/colors'
 
 interface ChartThemeConfig {
   chartHeight: string
@@ -21,11 +19,8 @@ export const useChartOps = (): ChartThemeConfig => ({
 })
 
 export function useChart(initOptions?: EChartsOption) {
-  const theme = computed(() => useSettingStore().systemThemeType)
-  const isDark = computed(() => theme.value === SystemThemeEnum.DARK)
-
   const settingStore = useSettingStore()
-  const menuOpen = computed(() => settingStore.menuOpen)
+  const { isDark, menuOpen, menuType } = storeToRefs(settingStore)
 
   // 收缩菜单时，重新计算图表大小
   watch(menuOpen, () => {
@@ -37,11 +32,18 @@ export function useChart(initOptions?: EChartsOption) {
     })
   })
 
+  // 菜单宽度变化触发
+  watch(menuType, () => {
+    nextTick(() => {
+      handleResize()
+    })
+  })
+
   // 坐标轴线样式
   const getAxisLineStyle = (show: boolean = true) => ({
     show,
     lineStyle: {
-      color: isDark.value ? '#444' : '#e8e8e8',
+      color: isDark.value ? '#444' : '#EDEDED',
       width: 1
     }
   })
@@ -50,15 +52,15 @@ export function useChart(initOptions?: EChartsOption) {
   const getSplitLineStyle = (show: boolean = true) => ({
     show,
     lineStyle: {
-      color: isDark.value ? '#444' : '#e8e8e8',
+      color: isDark.value ? '#444' : '#EDEDED',
       width: 1,
       type: 'dashed' as const
     }
   })
 
   // 坐标轴标签样式
-  const getAxisLabelStyle = () => ({
-    show: true,
+  const getAxisLabelStyle = (show: boolean = true) => ({
+    show,
     color: useChartOps().fontColor,
     fontSize: useChartOps().fontSize
   })
