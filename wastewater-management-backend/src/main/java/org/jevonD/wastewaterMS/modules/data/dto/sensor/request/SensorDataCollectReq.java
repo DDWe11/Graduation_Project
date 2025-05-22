@@ -1,5 +1,5 @@
 // org.jevonD.wastewaterMS.modules.data.dto.request.SensorDataCollectReq.java
-package org.jevonD.wastewaterMS.modules.data.dto.request;
+package org.jevonD.wastewaterMS.modules.data.dto.sensor.request;
 
 import lombok.Data;
 import java.util.List;

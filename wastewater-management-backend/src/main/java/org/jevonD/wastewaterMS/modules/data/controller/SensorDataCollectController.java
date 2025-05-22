@@ -1,8 +1,8 @@
 package org.jevonD.wastewaterMS.modules.data.controller;
 
 import org.jevonD.wastewaterMS.common.response.ResponseWrapper;
-import org.jevonD.wastewaterMS.modules.data.dto.request.SensorDataCollectReq;
-import org.jevonD.wastewaterMS.modules.data.dto.response.SensorDataCollectResp;
+import org.jevonD.wastewaterMS.modules.data.dto.sensor.request.SensorDataCollectReq;
+import org.jevonD.wastewaterMS.modules.data.dto.sensor.response.SensorDataCollectResp;
 import org.jevonD.wastewaterMS.modules.data.service.SensorDataCollectService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

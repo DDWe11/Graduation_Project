@@ -14,16 +14,13 @@ const axiosInstance = axios.create({
     post: { 'Content-Type': 'application/json;charset=utf-8' }
   },
   transformResponse: [
-    (data, headers) => {
-      const contentType = headers['content-type']
-      if (contentType && contentType.includes('application/json')) {
-        try {
-          return JSON.parse(data)
-        } catch {
-          return data
-        }
+    (data) => {
+      // 响应数据转换
+      try {
+        return typeof data === 'string' && data.startsWith('{') ? JSON.parse(data) : data
+      } catch {
+        return data // 解析失败时返回原数据
       }
-      return data
     }
   ]
 })
@@ -31,13 +28,13 @@ const axiosInstance = axios.create({
 // 请求拦截器
 axiosInstance.interceptors.request.use(
   (request: InternalAxiosRequestConfig) => {
-    const { accessToken } = useUserStore()
+    const { token } = useUserStore().info
 
     // 如果 token 存在，则设置请求头
-    if (accessToken) {
+    if (token) {
       request.headers.set({
         'Content-Type': 'application/json',
-        Authorization: accessToken
+        Authorization: `Bearer ${token}`
       })
     }
 
@@ -56,7 +53,7 @@ axiosInstance.interceptors.response.use(
     if (axios.isCancel(error)) {
       console.log('repeated request: ' + error.message)
     } else {
-      const errorMessage = error.response?.data.msg
+      const errorMessage = error.response?.data.message
       ElMessage.error(
         errorMessage
           ? `${errorMessage} ${EmojiText[500]}`
@@ -69,15 +66,11 @@ axiosInstance.interceptors.response.use(
 
 // 请求
 async function request<T = any>(config: AxiosRequestConfig): Promise<T> {
-  // 对 POST | PUT 请求特殊处理
-  if (config.method?.toUpperCase() === 'POST' || config.method?.toUpperCase() === 'PUT') {
-    // 如果已经有 data，则保留原有的 data
-    if (config.params && !config.data) {
-      config.data = config.params
-      config.params = undefined // 使用 undefined 而不是空对象
-    }
+  // 将 POST | PUT 请求的参数放入 data 中，并清空 params
+  if (config.method === 'POST' || config.method === 'PUT') {
+    config.data = config.params
+    config.params = {}
   }
-
   try {
     const res = await axiosInstance.request<T>({ ...config })
     return res.data
@@ -100,11 +93,11 @@ const api = {
   put<T>(config: AxiosRequestConfig): Promise<T> {
     return request({ ...config, method: 'PUT' }) // PUT 请求
   },
-  del<T>(config: AxiosRequestConfig): Promise<T> {
+  delete<T>(config: AxiosRequestConfig): Promise<T> {
     return request({ ...config, method: 'DELETE' }) // DELETE 请求
   },
-  request<T>(config: AxiosRequestConfig): Promise<T> {
-    return request({ ...config }) // 通用请求
+  patch<T>(config: AxiosRequestConfig): Promise<T> {
+    return request({ ...config, method: 'PATCH' })
   }
 }
 

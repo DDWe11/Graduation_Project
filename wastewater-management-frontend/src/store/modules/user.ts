@@ -1,148 +1,114 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
 import { LanguageEnum } from '@/enums/appEnum'
-import { router } from '@/router'
+import { router, setPageTitle } from '@/router'
 import { UserInfo } from '@/types/store'
 import { useSettingStore } from './setting'
 import { useWorktabStore } from './worktab'
 import { getSysStorage } from '@/utils/storage'
 import { MenuListType } from '@/types/menu'
-import { useTableStore } from './table'
-import { setPageTitle } from '@/router/utils/utils'
-import { resetRouterState } from '@/router/guards/beforeEach'
 
-// 用户
-export const useUserStore = defineStore('userStore', () => {
-  const language = ref(LanguageEnum.ZH)
-  const isLogin = ref(false)
-  const isLock = ref(false)
-  const lockPassword = ref('')
-  const info = ref<Partial<UserInfo>>({})
-  const searchHistory = ref<MenuListType[]>([])
-  const accessToken = ref('')
-  const refreshToken = ref('')
+interface UserState {
+  language: LanguageEnum // 语言
+  isLogin: boolean // 是否登录
+  isLock: boolean // 是否锁屏
+  lockPassword: string // 锁屏密码
+  info: Partial<UserInfo> // 用户信息
+  searchHistory: MenuListType[] // 搜索历史
+}
 
-  const getUserInfo = computed(() => info.value)
-  const getSettingState = computed(() => useSettingStore().$state)
-  const getWorktabState = computed(() => useWorktabStore().$state)
-  const getTableState = computed(() => useTableStore().$state)
-
-  const initState = () => {
-    let sys = getSysStorage()
-
-    if (sys) {
-      sys = JSON.parse(sys)
-      const {
-        info: storedInfo,
-        isLogin: storedIsLogin,
-        language: storedLanguage,
-        searchHistory: storedSearchHistory,
-        isLock: storedIsLock,
-        lockPassword: storedLockPassword,
-        token: storedToken,
-        refreshToken: storedRefreshToken
-      } = sys.user
-
-      info.value = storedInfo || {}
-      isLogin.value = storedIsLogin || false
-      isLock.value = storedIsLock || false
-      language.value = storedLanguage || LanguageEnum.ZH
-      searchHistory.value = storedSearchHistory || []
-      lockPassword.value = storedLockPassword || ''
-      refreshToken.value = storedRefreshToken || ''
-      accessToken.value = storedToken || ''
+export const useUserStore = defineStore({
+  id: 'userStore',
+  state: (): UserState => ({
+    language: LanguageEnum.ZH,
+    isLogin: false,
+    isLock: false,
+    lockPassword: '',
+    info: {},
+    searchHistory: []
+  }),
+  getters: {
+    getUserInfo(): Partial<UserInfo> {
+      return this.info
+    },
+    getSettingState() {
+      return useSettingStore().$state
+    },
+    getWorktabState() {
+      return useWorktabStore().$state
     }
-  }
+  },
+  actions: {
+    initState() {
+      let sys = getSysStorage()
 
-  const saveUserData = () => {
-    saveStoreStorage({
-      user: {
-        info: info.value,
-        isLogin: isLogin.value,
-        language: language.value,
-        isLock: isLock.value,
-        lockPassword: lockPassword.value,
-        searchHistory: searchHistory.value,
-        token: accessToken.value,
-        refreshToken: refreshToken.value,
-        worktab: getWorktabState.value,
-        setting: getSettingState.value,
-        table: getTableState.value
+      if (sys) {
+        sys = JSON.parse(sys)
+        const { info, isLogin, language, searchHistory, isLock, lockPassword } = sys.user
+
+        this.info = info || {}
+        this.isLogin = isLogin || false
+        this.isLock = isLock || false
+        this.language = language || LanguageEnum.ZH
+        this.searchHistory = searchHistory || []
+        this.lockPassword = lockPassword || ''
       }
-    })
-  }
-
-  const setUserInfo = (newInfo: UserInfo) => {
-    info.value = newInfo
-  }
-
-  const setLoginStatus = (status: boolean) => {
-    isLogin.value = status
-  }
-
-  const setLanguage = (lang: LanguageEnum) => {
-    setPageTitle(router.currentRoute.value)
-    language.value = lang
-  }
-
-  const setSearchHistory = (list: MenuListType[]) => {
-    searchHistory.value = list
-  }
-
-  const setLockStatus = (status: boolean) => {
-    isLock.value = status
-  }
-
-  const setLockPassword = (password: string) => {
-    lockPassword.value = password
-  }
-
-  const setToken = (newAccessToken: string, newRefreshToken?: string) => {
-    accessToken.value = newAccessToken
-    if (newRefreshToken) {
-      refreshToken.value = newRefreshToken
+    },
+    // 用户数据持久化存储
+    saveUserData() {
+      saveStoreStorage({
+        user: {
+          info: this.info,
+          isLogin: this.isLogin,
+          language: this.language,
+          isLock: this.isLock,
+          lockPassword: this.lockPassword,
+          searchHistory: this.searchHistory,
+          worktab: this.getWorktabState,
+          setting: this.getSettingState
+        }
+      })
+    },
+    setUserInfo(info: UserInfo) {
+      this.info = info
+    },
+    setLoginStatus(isLogin: boolean) {
+      this.isLogin = isLogin
+    },
+    setLanguage(lang: LanguageEnum) {
+      setPageTitle(router.currentRoute.value)
+      this.language = lang
+    },
+    setSearchHistory(list: Array<MenuListType>) {
+      this.searchHistory = list
+    },
+    setLockStatus(isLock: boolean) {
+      this.isLock = isLock
+    },
+    setLockPassword(password: string) {
+      this.lockPassword = password
+    },
+    logOut() {
+      setTimeout(() => {
+        // document.getElementsByTagName('html')[0].removeAttribute('class') // 移除暗黑主题
+        this.info = {}
+        this.isLogin = false
+        this.isLock = false
+        this.lockPassword = ''
+        useWorktabStore().opened = []
+        this.saveUserData()
+        sessionStorage.removeItem('iframeRoutes')
+        router.push('/login')
+      }, 300)
     }
-    saveUserData()
-  }
-
-  const logOut = () => {
-    info.value = {}
-    isLogin.value = false
-    isLock.value = false
-    lockPassword.value = ''
-    accessToken.value = ''
-    refreshToken.value = ''
-    useWorktabStore().opened = []
-    saveUserData()
-    sessionStorage.removeItem('iframeRoutes')
-    resetRouterState(router)
-    router.push('/login')
-  }
-
-  return {
-    language,
-    isLogin,
-    isLock,
-    lockPassword,
-    info,
-    searchHistory,
-    accessToken,
-    refreshToken,
-    getUserInfo,
-    getSettingState,
-    getWorktabState,
-    initState,
-    saveUserData,
-    setUserInfo,
-    setLoginStatus,
-    setLanguage,
-    setSearchHistory,
-    setLockStatus,
-    setLockPassword,
-    setToken,
-    logOut
   }
 })
+
+function initVersion(version: string) {
+  const vs = localStorage.getItem('version')
+  if (!vs) {
+    localStorage.setItem('version', version)
+  }
+}
 
 // 数据持久化存储
 function saveStoreStorage<T>(newData: T) {
@@ -154,12 +120,4 @@ function saveStoreStorage<T>(newData: T) {
   // 合并新数据与现有数据
   const mergedData = { ...storedData, ...newData }
   localStorage.setItem(`sys-v${vs}`, JSON.stringify(mergedData))
-}
-
-// 初始化版本
-function initVersion(version: string) {
-  const vs = localStorage.getItem('version')
-  if (!vs) {
-    localStorage.setItem('version', version)
-  }
 }

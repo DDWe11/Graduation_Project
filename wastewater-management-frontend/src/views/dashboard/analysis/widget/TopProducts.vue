@@ -4,15 +4,7 @@
       <span class="title">{{ t('analysis.topProducts.title') }}</span>
     </div>
     <div class="custom-card-body">
-      <art-table
-        :data="products"
-        style="width: 100%"
-        :pagination="false"
-        size="large"
-        :border="false"
-        :stripe="false"
-        :show-header-background="false"
-      >
+      <art-table :data="products" style="width: 100%" :pagination="false">
         <el-table-column prop="name" :label="t('analysis.topProducts.columns.name')" width="200" />
         <el-table-column prop="popularity" :label="t('analysis.topProducts.columns.popularity')">
           <template #default="scope">

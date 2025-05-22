@@ -3,7 +3,7 @@
     <h1 class="page-title">统计卡片（文字）</h1>
     <el-row :gutter="20">
       <el-col :xs="24" :sm="12" :md="6" v-for="card in statsCards" :key="card.id">
-        <ArtStatsCard
+        <StatsCard
           :icon="card.icon"
           :title="card.title"
           :description="card.description"
@@ -18,7 +18,7 @@
     <h1 class="page-title">统计卡片（数字滚动）</h1>
     <el-row :gutter="20">
       <el-col :xs="24" :sm="12" :md="6" v-for="card in statsCards" :key="card.id">
-        <ArtStatsCard
+        <StatsCard
           :icon="card.icon"
           :count="card.count"
           :description="card.description"
@@ -33,7 +33,7 @@
     <h1 class="page-title">统计卡片（自定义样式）</h1>
     <el-row :gutter="20">
       <el-col :xs="24" :sm="12" :md="6" v-for="card in statsCards" :key="card.id">
-        <ArtStatsCard
+        <StatsCard
           :icon="card.icon"
           :title="card.title"
           :description="card.description"
@@ -48,14 +48,14 @@
     <h1 class="page-title">进度卡片</h1>
     <el-row :gutter="20">
       <el-col :xs="24" :sm="12" :md="6" v-for="card in progressCards" :key="card.id">
-        <ArtProgressCard :percentage="card.percentage" :title="card.title" :color="card.color" />
+        <ProgressCard :percentage="card.percentage" :title="card.title" :color="card.color" />
       </el-col>
     </el-row>
 
     <h1 class="page-title">进度卡片（icon）</h1>
     <el-row :gutter="20">
       <el-col :xs="24" :sm="12" :md="6" v-for="card in progressCards" :key="card.id">
-        <ArtProgressCard
+        <ProgressCard
           :percentage="card.percentage"
           :title="card.title"
           :color="card.color"
@@ -67,60 +67,10 @@
       </el-col>
     </el-row>
 
-    <h1 class="page-title">图表卡片（小图表）</h1>
+    <h1 class="page-title">图表卡片</h1>
     <el-row :gutter="20">
       <el-col :xs="24" :sm="12" :md="6">
-        <ArtLineChartCard
-          :isMiniChart="true"
-          :value="2545"
-          label="新用户"
-          date="过去7天"
-          :percentage="1.2"
-          :height="9.5"
-          :chartData="[120, 132, 101, 134, 90, 230, 210]"
-        />
-      </el-col>
-      <el-col :xs="24" :sm="12" :md="6">
-        <ArtBarChartCard
-          :isMiniChart="true"
-          :value="15480"
-          label="浏览量"
-          date="过去 14 天"
-          :percentage="-4.15"
-          :height="9.5"
-          :chartData="[120, 100, 150, 140, 90, 120, 130]"
-        />
-      </el-col>
-      <el-col :xs="24" :sm="12" :md="6">
-        <ArtLineChartCard
-          :isMiniChart="true"
-          :value="2545"
-          label="粉丝数"
-          date="过去 30 天"
-          :percentage="1.2"
-          :height="9.5"
-          :showAreaColor="true"
-          :chartData="[150, 180, 160, 200, 180, 220, 240]"
-        />
-      </el-col>
-      <el-col :xs="24" :sm="12" :md="6">
-        <ArtDonutChartCard
-          :value="36358"
-          title="粉丝量"
-          :percentage="18"
-          :data="[50, 40]"
-          :height="9.5"
-          currentYear="2022"
-          previousYear="2021"
-          :radius="['50%', '70%']"
-        />
-      </el-col>
-    </el-row>
-
-    <h1 class="page-title">图表卡片（大图表）</h1>
-    <el-row :gutter="20">
-      <el-col :xs="24" :sm="12" :md="6">
-        <ArtLineChartCard
+        <LineChartCard
           :value="2545"
           label="新用户"
           :percentage="1.2"
@@ -129,7 +79,7 @@
         />
       </el-col>
       <el-col :xs="24" :sm="12" :md="6">
-        <ArtBarChartCard
+        <BarChartCard
           :value="15480"
           label="浏览量"
           :percentage="-4.15"
@@ -138,17 +88,17 @@
         />
       </el-col>
       <el-col :xs="24" :sm="12" :md="6">
-        <ArtLineChartCard
+        <LineChartCard
           :value="2545"
           label="粉丝数"
           :percentage="1.2"
           :height="11"
           :showAreaColor="true"
-          :chartData="[150, 180, 160, 200, 180, 220, 240]"
+          :chartData="[120, 132, 101, 134, 90, 230, 210]"
         />
       </el-col>
       <el-col :xs="24" :sm="12" :md="6">
-        <ArtDonutChartCard
+        <DonutChartCard
           :value="36358"
           title="粉丝量"
           :percentage="18"
@@ -163,10 +113,10 @@
     <h1 class="page-title">数据列表卡片</h1>
     <el-row :gutter="20">
       <el-col :xs="24" :sm="12" :lg="8">
-        <ArtDataListCard :list="dataList" title="待办事项" subtitle="今日待处理任务" />
+        <DataListCard :list="dataList" title="待办事项" subtitle="今日待处理任务" />
       </el-col>
       <el-col :xs="24" :sm="12" :lg="8">
-        <ArtDataListCard
+        <DataListCard
           :maxCount="4"
           :list="dataList"
           title="最近活动"
@@ -176,14 +126,14 @@
         />
       </el-col>
       <el-col :xs="24" :sm="12" :lg="8">
-        <ArtTimelineListCard :list="timelineData" title="最近交易" subtitle="2024年12月20日" />
+        <TimelineListCard :list="timelineData" title="最近交易" subtitle="2024年12月20日" />
       </el-col>
     </el-row>
 
     <h1 class="page-title">图片卡片</h1>
     <el-row :gutter="20">
       <el-col :xs="24" :sm="12" :md="6" v-for="card in imageCards" :key="card.id">
-        <ArtImageCard
+        <ImageCard
           :imageUrl="card.imageUrl"
           :title="card.title"
           :category="card.category"

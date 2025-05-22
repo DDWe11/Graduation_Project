@@ -1,10 +1,10 @@
 <template>
   <div class="page-content">
-    <ArtExcelImport @import-success="handleImportSuccess" @import-error="handleImportError">
+    <ExcelImport @import-success="handleImportSuccess" @import-error="handleImportError">
       <template #import-text> 上传 Excel </template>
-    </ArtExcelImport>
+    </ExcelImport>
 
-    <ArtExcelExport
+    <ExcelExport
       style="margin-left: 10px"
       :data="tableData"
       filename="用户数据"
@@ -15,7 +15,7 @@
       @export-error="handleExportError"
     >
       导出 Excel
-    </ArtExcelExport>
+    </ExcelExport>
 
     <el-button type="danger" @click="handleClear" v-ripple>清除数据</el-button>
 

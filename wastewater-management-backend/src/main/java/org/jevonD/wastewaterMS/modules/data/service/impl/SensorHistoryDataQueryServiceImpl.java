@@ -1,9 +1,9 @@
 package org.jevonD.wastewaterMS.modules.data.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.jevonD.wastewaterMS.modules.data.dto.request.SensorHistoryDataQueryReq;
-import org.jevonD.wastewaterMS.modules.data.dto.response.SensorHistoryDataQueryResp;
-import org.jevonD.wastewaterMS.modules.data.dto.response.SensorHistoryDataQueryResp.SensorHistoryDataItem;
+import org.jevonD.wastewaterMS.modules.data.dto.sensor.request.SensorHistoryDataQueryReq;
+import org.jevonD.wastewaterMS.modules.data.dto.sensor.response.SensorHistoryDataQueryResp;
+import org.jevonD.wastewaterMS.modules.data.dto.sensor.response.SensorHistoryDataQueryResp.SensorHistoryDataItem;
 import org.jevonD.wastewaterMS.modules.data.entity.SensorData;
 import org.jevonD.wastewaterMS.modules.data.service.SensorHistoryDataQueryService;
 import org.jevonD.wastewaterMS.modules.data.repository.SensorDataRepository;

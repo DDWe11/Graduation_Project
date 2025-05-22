@@ -1,4 +1,4 @@
-package org.jevonD.wastewaterMS.modules.data.dto.request;
+package org.jevonD.wastewaterMS.modules.data.dto.sensor.request;
 
 import lombok.Data;
 import java.time.LocalDateTime;

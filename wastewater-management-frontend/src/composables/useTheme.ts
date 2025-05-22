@@ -1,6 +1,6 @@
 import { useSettingStore } from '@/store/modules/setting'
 import { SystemThemeEnum } from '@/enums/appEnum'
-import AppConfig from '@/config'
+import { SystemThemeStyles } from '@/config/setting'
 import { SystemThemeTypes } from '@/types/store'
 import { getDarkColor, getLightColor } from '@/utils/color'
 
@@ -35,7 +35,7 @@ export function useTheme() {
       themeMode = theme
     }
 
-    const currentTheme = AppConfig.systemThemeStyles[theme as keyof SystemThemeTypes]
+    const currentTheme = SystemThemeStyles[theme as keyof SystemThemeTypes]
 
     if (currentTheme) {
       el.setAttribute('class', currentTheme.className)
@@ -72,7 +72,7 @@ export function useTheme() {
   }
 
   // 切换主题
-  const switchThemeStyles = (theme: SystemThemeEnum) => {
+  const switchTheme = (theme: SystemThemeEnum) => {
     if (theme === SystemThemeEnum.AUTO) {
       setSystemAutoTheme()
     } else {
@@ -83,6 +83,6 @@ export function useTheme() {
   return {
     setSystemTheme,
     setSystemAutoTheme,
-    switchThemeStyles
+    switchTheme
   }
 }

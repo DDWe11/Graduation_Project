@@ -310,11 +310,6 @@
     "onWatcherCleanup": true,
     "useId": true,
     "useModel": true,
-    "useTemplateRef": true,
-    "ElTableColumn": true,
-    "ElButton": true,
-    "ElPopconfirm": true,
-    "ElTag": true,
-    "ElPopover": true
+    "useTemplateRef": true
   }
 }

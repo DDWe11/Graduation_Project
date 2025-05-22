@@ -11,15 +11,7 @@
         <el-radio-button value="今年" label="今年"></el-radio-button>
       </el-radio-group>
     </div>
-    <art-table
-      class="table"
-      :data="tableData"
-      :pagination="false"
-      size="large"
-      :border="false"
-      :stripe="false"
-      :show-header-background="false"
-    >
+    <art-table :data="tableData" :pagination="false">
       <template #default>
         <el-table-column label="头像" prop="avatar" width="150px">
           <template #default="scope">
@@ -146,20 +138,33 @@
       color: var(--el-color-primary) !important;
       background: transparent !important;
     }
+
+    .any-table {
+      .el-table {
+        thead {
+          tr {
+            height: 55px !important;
+          }
+        }
+
+        tr {
+          height: 55px !important;
+        }
+      }
+    }
   }
 </style>
 
 <style lang="scss" scoped>
   .region {
     width: 50%;
-    overflow: hidden;
+
+    .any-table {
+      box-shadow: none;
+    }
 
     .card-header {
       padding-left: 25px !important;
-    }
-
-    :deep(.el-table__body tr:last-child td) {
-      border-bottom: none !important;
     }
 
     .avatar {

@@ -10,17 +10,31 @@
 </template>
 
 <script setup lang="ts">
+  import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+  import { useECharts } from '@/utils/echarts/useECharts'
+  import { useSettingStore } from '@/store/modules/setting'
   import { useI18n } from 'vue-i18n'
-  import { useChart } from '@/composables/useChart'
-  import { EChartsOption } from 'echarts'
 
   const { t } = useI18n()
 
-  const { chartRef, isDark, initChart } = useChart()
+  const store = useSettingStore()
+  const isDark = computed(() => store.isDark)
 
+  const chartRef = ref<HTMLDivElement | null>(null)
+  const { setOptions, removeResize, resize } = useECharts(chartRef as Ref<HTMLDivElement>)
+  const settingStore = useSettingStore()
+  const menuOpen = computed(() => settingStore.menuOpen)
   const { width } = useWindowSize()
 
-  const options: () => EChartsOption = () => {
+  // 收缩菜单时，重新计算图表大小
+  watch(menuOpen, () => {
+    const delays = [100, 200, 300]
+    delays.forEach((delay) => {
+      setTimeout(resize, delay)
+    })
+  })
+
+  const getChartOption = computed(() => {
     return {
       tooltip: {
         trigger: 'axis'
@@ -35,7 +49,8 @@
       legend: {
         data: [
           t('analysis.visitorInsights.legend.loyalCustomers'),
-          t('analysis.visitorInsights.legend.newCustomers')
+          t('analysis.visitorInsights.legend.newCustomers'),
+          t('analysis.visitorInsights.legend.uniqueCustomers')
         ],
         bottom: 0,
         left: 'center',
@@ -101,14 +116,18 @@
         }
       ]
     }
-  }
+  })
 
   watch(isDark, () => {
-    initChart(options())
+    setOptions(getChartOption.value)
   })
 
   onMounted(() => {
-    initChart(options())
+    setOptions(getChartOption.value)
+  })
+
+  onUnmounted(() => {
+    removeResize()
   })
 </script>
 

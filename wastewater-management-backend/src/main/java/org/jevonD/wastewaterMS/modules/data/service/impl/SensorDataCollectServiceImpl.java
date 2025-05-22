@@ -1,8 +1,8 @@
 package org.jevonD.wastewaterMS.modules.data.service.impl;
 
 import org.jevonD.wastewaterMS.common.utils.SensorSimulateUtils;
-import org.jevonD.wastewaterMS.modules.data.dto.request.SensorDataCollectReq;
-import org.jevonD.wastewaterMS.modules.data.dto.response.SensorDataCollectResp;
+import org.jevonD.wastewaterMS.modules.data.dto.sensor.request.SensorDataCollectReq;
+import org.jevonD.wastewaterMS.modules.data.dto.sensor.response.SensorDataCollectResp;
 import org.jevonD.wastewaterMS.modules.data.entity.SensorData;
 import org.jevonD.wastewaterMS.modules.sensor.entity.SensorDevice;
 import org.jevonD.wastewaterMS.modules.sensor.entity.SensorType;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 

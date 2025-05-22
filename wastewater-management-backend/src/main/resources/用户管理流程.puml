@@ -1,11 +1,51 @@
 @startuml
 'https://plantuml.com/sequence-diagram
 
-autonumber
+@startuml
+participant Actor
+Actor -> AdminUserController : createUser
+activate AdminUserController
+AdminUserController -> AdminUserService : createUser
+activate AdminUserService
+AdminUserService --> AdminUserController
+deactivate AdminUserService
+AdminUserController -> ResponseWrapper : success
+activate ResponseWrapper
+ResponseWrapper -> ResponseWrapper : new
+activate ResponseWrapper
+ResponseWrapper --> ResponseWrapper
+deactivate ResponseWrapper
+ResponseWrapper --> AdminUserController
+deactivate ResponseWrapper
+AdminUserController -> ResponseWrapper : error
+activate ResponseWrapper
+ResponseWrapper -> ResponseWrapper : new
+activate ResponseWrapper
+ResponseWrapper --> ResponseWrapper
+deactivate ResponseWrapper
+ResponseWrapper --> AdminUserController
+deactivate ResponseWrapper
+return
+@enduml
+@startuml
+actor Admin
+participant "User Management Page" as UMP
+participant "UserAdminController" as UAC
+participant "UserAdminServiceImpl" as UAS
+participant "SysUserMapper" as SUM
+participant "SysUserInfoMapper" as SUIM
 
-Alice -> Bob: Authentication Request
-Bob --> Alice: Authentication Response
-
-Alice -> Bob: Another authentication Request
-Alice <-- Bob: another authentication Response
+Admin -> UMP : 发起用户操作
+UMP -> UAC : createUser()
+activate UAC
+UAC -> UAS : createUser()
+activate UAS
+UAS -> SUM : insert user
+SUM --> UAS
+UAS -> SUIM : insert user info
+SUIM --> UAS
+UAS --> UAC
+deactivate UAS
+UAC --> UMP : 返回结果
+deactivate UAC
 @enduml

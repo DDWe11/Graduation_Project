@@ -24,7 +24,7 @@
         </el-row>
 
         <!-- 富文本编辑器 -->
-        <ArtWangEditor class="el-top" v-model="editorHtml" />
+        <editor class="el-top" v-model="editorHtml"></editor>
 
         <div class="form-wrap">
           <h2>发布设置</h2>
@@ -81,18 +81,17 @@
   import EmojiText from '@/utils/emojo'
   import { PageModeEnum } from '@/enums/formEnum'
   import axios from 'axios'
-  import { useCommon } from '@/composables/useCommon'
 
   const route = useRoute()
   const router = useRouter()
 
   const userStore = useUserStore()
-  let { accessToken } = userStore
+  let { token } = userStore.info
 
   // 上传路径
   const uploadImageUrl = `${import.meta.env.VITE_API_URL}/api/common/upload`
   // 传递 token
-  const uploadHeaders = { Authorization: accessToken }
+  const uploadHeaders = { Authorization: token }
 
   let pageMode: PageModeEnum = PageModeEnum.Add // 页面类型 新增 ｜ 编辑
   const articleName = ref('') // 文章标题
@@ -105,7 +104,7 @@
   // const outlineList = ref()
 
   onMounted(() => {
-    useCommon().scrollToTop()
+    scrollToTop()
     getArticleTypes()
     initPageMode()
   })
@@ -293,6 +292,10 @@
     setTimeout(() => {
       router.go(-1)
     }, 800)
+  }
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0 })
   }
 
   // 添加上传前的校验

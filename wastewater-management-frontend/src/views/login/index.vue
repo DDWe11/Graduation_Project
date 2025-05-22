@@ -1,7 +1,7 @@
 <template>
   <div class="login">
     <div class="left-wrap">
-      <LoginLeftView></LoginLeftView>
+      <left-view></left-view>
     </div>
     <div class="right-wrap">
       <div class="top-right-wrap">
@@ -30,7 +30,9 @@
         </el-dropdown>
       </div>
       <div class="header">
-        <ArtLogo class="icon" />
+        <svg class="icon" aria-hidden="true">
+          <use xlink:href="#iconsys-zhaopian-copy"></use>
+        </svg>
         <h1>{{ systemName }}</h1>
       </div>
       <div class="login-wrap">
@@ -44,27 +46,17 @@
             @keyup.enter="handleSubmit"
             style="margin-top: 25px"
           >
-            <el-form-item prop="account">
-              <el-select v-model="formData.account" @change="setupAccount">
-                <el-option
-                  v-for="account in accounts"
-                  :key="account.key"
-                  :label="account.label"
-                  :value="account.key"
-                >
-                  <span>{{ account.label }}</span>
-                </el-option>
-              </el-select>
-            </el-form-item>
             <el-form-item prop="username">
               <el-input
                 :placeholder="$t('login.placeholder[0]')"
+                size="large"
                 v-model.trim="formData.username"
               />
             </el-form-item>
             <el-form-item prop="password">
               <el-input
                 :placeholder="$t('login.placeholder[1]')"
+                size="large"
                 v-model.trim="formData.password"
                 type="password"
                 radius="8px"
@@ -73,7 +65,8 @@
             </el-form-item>
             <div class="drag-verify">
               <div class="drag-verify-content" :class="{ error: !isPassing && isClickPass }">
-                <ArtDragVerify
+                <!-- :background="isDark ? '#181818' : '#eee'" -->
+                <DragVerify
                   ref="dragVerify"
                   v-model:value="isPassing"
                   :width="width < 500 ? 328 : 438"
@@ -101,6 +94,7 @@
             <div style="margin-top: 30px">
               <el-button
                 class="login-btn"
+                size="large"
                 type="primary"
                 @click="handleSubmit"
                 :loading="loading"
@@ -124,72 +118,35 @@
 </template>
 
 <script setup lang="ts">
-  import AppConfig from '@/config'
+  import LeftView from '@/components/Pages/Login/LeftView.vue'
+  import { SystemInfo } from '@/config/setting'
   import { ElMessage, ElNotification } from 'element-plus'
   import { useUserStore } from '@/store/modules/user'
-  import { HOME_PAGE } from '@/router/routesAlias'
+  import { HOME_PAGE } from '@/router'
   import { ApiStatus } from '@/utils/http/status'
-  import { getCssVariable } from '@/utils/colors'
-  import { languageOptions } from '@/language'
+  import { getCssVariable } from '@/utils/utils'
   import { LanguageEnum, SystemThemeEnum } from '@/enums/appEnum'
   import { useI18n } from 'vue-i18n'
-
   const { t } = useI18n()
   import { useSettingStore } from '@/store/modules/setting'
   import type { FormInstance, FormRules } from 'element-plus'
-
-  type AccountKey = 'super' | 'admin' | 'user'
-
-  export interface Account {
-    key: AccountKey
-    label: string
-    userName: string
-    password: string
-    roles: string[]
-  }
-
-  const accounts = computed<Account[]>(() => [
-    {
-      key: 'super',
-      label: t('login.roles.super'),
-      userName: 'Super',
-      password: '123456',
-      roles: ['R_SUPER']
-    },
-    {
-      key: 'admin',
-      label: t('login.roles.admin'),
-      userName: 'Admin',
-      password: '123456',
-      roles: ['R_ADMIN']
-    },
-    {
-      key: 'user',
-      label: t('login.roles.user'),
-      userName: 'User',
-      password: '123456',
-      roles: ['R_USER']
-    }
-  ])
-
-  const settingStore = useSettingStore()
-  const { isDark, systemThemeType } = storeToRefs(settingStore)
-
-  const dragVerify = ref()
 
   const userStore = useUserStore()
   const router = useRouter()
   const isPassing = ref(false)
   const isClickPass = ref(false)
 
-  const systemName = AppConfig.systemInfo.name
+  const systemName = SystemInfo.name
   const formRef = ref<FormInstance>()
+  // 使用localStorage获取保存的用户信息
+  const savedUsername = localStorage.getItem('username')
+  const savedPassword = localStorage.getItem('password')
+  const isRememberPassword = localStorage.getItem('rememberPassword') === 'true'
 
   const formData = reactive({
-    account: '',
-    username: '',
-    password: '',
-    rememberPassword: true
+    username: savedUsername || '', // 如果有保存的用户名则使用，否则为空
+    password: savedPassword || '', // 如果有保存的密码则使用，否则为空
+    rememberPassword: isRememberPassword // 根据保存的状态设置记住密码的勾选
   })
 
   const rules = computed<FormRules>(() => ({
@@ -200,20 +157,11 @@
   const loading = ref(false)
   const { width } = useWindowSize()
 
-  onMounted(() => {
-    setupAccount('super')
-  })
-
-  // 设置账号
-  const setupAccount = (key: AccountKey) => {
-    const selectedAccount = accounts.value.find((account: Account) => account.key === key)
-    formData.account = key
-    formData.username = selectedAccount?.userName ?? ''
-    formData.password = selectedAccount?.password ?? ''
-  }
+  const store = useSettingStore()
+  const isDark = computed(() => store.isDark)
 
   const onPass = () => {}
-
+  // 延时辅助函数
   const handleSubmit = async () => {
     if (!formRef.value) return
 
@@ -226,49 +174,39 @@
 
         loading.value = true
 
-        const params = {
-          userName: formData.username,
-          password: formData.password
-        }
+        // 延时辅助函数
+        const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
         try {
-          const res = await UserService.login(params)
+          const res = await UserService.login({
+            username: formData.username,
+            password: formData.password
+          })
 
-          if (res.code === ApiStatus.success) {
-            const { token, refreshToken } = res.data
-
-            if (token) {
-              userStore.setToken(token, refreshToken)
-              const res = await UserService.getUserInfo()
-
-              // 设置登录状态
-              userStore.setLoginStatus(true)
-              // 登录成功提示
-              showLoginSuccessNotice()
-
-              if (res.code === ApiStatus.success) {
-                userStore.setUserInfo(res.data)
-                userStore.setLoginStatus(true)
-                router.push(HOME_PAGE)
-              } else {
-                ElMessage.error(res.msg)
-              }
+          if (res.code === ApiStatus.success && res.data) {
+            userStore.setUserInfo(res.data)
+            userStore.setLoginStatus(true)
+            if (formData.rememberPassword) {
+              localStorage.setItem('username', formData.username)
+              localStorage.setItem('password', formData.password)
+              localStorage.setItem('rememberPassword', 'ture')
+            } else {
+              localStorage.removeItem('username')
+              localStorage.removeItem('password')
+              localStorage.removeItem('rememberPassword')
             }
+            await delay(1000)
+            showLoginSuccessNotice()
+            router.push(HOME_PAGE)
           } else {
-            loading.value = false
-            resetDragVerify()
+            ElMessage.error(res.message)
           }
         } finally {
+          await delay(1000)
           loading.value = false
-          resetDragVerify()
         }
       }
     })
-  }
-
-  // 重置拖拽验证
-  const resetDragVerify = () => {
-    dragVerify.value.reset()
   }
 
   // 登录成功提示
@@ -277,11 +215,12 @@
       ElNotification({
         title: t('login.success.title'),
         type: 'success',
+        showClose: false,
         duration: 2500,
         zIndex: 10000,
         message: `${t('login.success.message')}, ${systemName}!`
       })
-    }, 150)
+    }, 300)
   }
 
   // 切换语言
@@ -299,8 +238,14 @@
 
   const toggleTheme = () => {
     let { LIGHT, DARK } = SystemThemeEnum
-    useTheme().switchThemeStyles(systemThemeType.value === LIGHT ? DARK : LIGHT)
+    useTheme().switchTheme(useSettingStore().systemThemeType === LIGHT ? DARK : LIGHT)
   }
+
+  // 语言配置
+  const languageOptions = [
+    { value: LanguageEnum.ZH, label: '简体中文' },
+    { value: LanguageEnum.EN, label: 'English' }
+  ]
 </script>
 
 <style lang="scss" scoped>

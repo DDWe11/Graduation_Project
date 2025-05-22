@@ -63,7 +63,7 @@
   const watermarkImage = ref('https://element-plus.org/images/element-plus-logo.svg')
 
   const handleWatermarkVisible = () => {
-    useSettingStore().setWatermarkVisible(!settingStore.watermarkVisible)
+    settingStore.setWatermarkVisible(!settingStore.watermarkVisible)
   }
 </script>
 

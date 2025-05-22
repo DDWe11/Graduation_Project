@@ -1,7 +1,7 @@
 package org.jevonD.wastewaterMS.modules.data.service.impl;
 
-import org.jevonD.wastewaterMS.modules.data.dto.request.SensorDataCollectReq;
-import org.jevonD.wastewaterMS.modules.data.dto.response.SensorDataCollectResp;
+import org.jevonD.wastewaterMS.modules.data.dto.sensor.request.SensorDataCollectReq;
+import org.jevonD.wastewaterMS.modules.data.dto.sensor.response.SensorDataCollectResp;
 import org.jevonD.wastewaterMS.modules.data.service.SensorDataCollectService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

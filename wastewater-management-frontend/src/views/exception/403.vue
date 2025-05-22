@@ -1,5 +1,5 @@
 <template>
-  <ArtException :data="data" />
+  <Exception :data="data"></Exception>
 </template>
 
 <script setup lang="ts">

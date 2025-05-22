@@ -1,7 +1,7 @@
 package org.jevonD.wastewaterMS.modules.data.service;
 
-import org.jevonD.wastewaterMS.modules.data.dto.request.SensorHistoryDataQueryReq;
-import org.jevonD.wastewaterMS.modules.data.dto.response.SensorHistoryDataQueryResp;
+import org.jevonD.wastewaterMS.modules.data.dto.sensor.request.SensorHistoryDataQueryReq;
+import org.jevonD.wastewaterMS.modules.data.dto.sensor.response.SensorHistoryDataQueryResp;
 
 /**
  * 传感器历史数据查询服务

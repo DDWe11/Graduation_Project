@@ -1,8 +1,8 @@
 package org.jevonD.wastewaterMS.modules.data.controller;
 
 import jakarta.validation.Valid;
-import org.jevonD.wastewaterMS.modules.data.dto.request.SensorHistoryDataQueryReq;
-import org.jevonD.wastewaterMS.modules.data.dto.response.SensorHistoryDataQueryResp;
+import org.jevonD.wastewaterMS.modules.data.dto.sensor.request.SensorHistoryDataQueryReq;
+import org.jevonD.wastewaterMS.modules.data.dto.sensor.response.SensorHistoryDataQueryResp;
 import org.jevonD.wastewaterMS.modules.data.service.SensorHistoryDataQueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

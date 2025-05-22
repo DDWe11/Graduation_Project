@@ -1,7 +1,7 @@
 <template>
-  <ElConfigProvider size="default" :locale="locales[language]" :z-index="3000">
-    <RouterView></RouterView>
-  </ElConfigProvider>
+  <el-config-provider :size="elSize" :locale="locales[language]" :z-index="3000">
+    <router-view></router-view>
+  </el-config-provider>
 </template>
 
 <script setup lang="ts">
@@ -10,12 +10,10 @@
   import en from 'element-plus/es/locale/lang/en'
   import { systemUpgrade } from './utils/upgrade'
   import { initState, saveUserData } from './utils/storage'
-  import { UserService } from './api/usersApi'
-  import { ApiStatus } from './utils/http/status'
-  import { setThemeTransitionClass } from './utils/theme/animation'
 
   const userStore = useUserStore()
-  const { language } = storeToRefs(userStore)
+  const language = computed(() => userStore.language)
+  const elSize = computed(() => (document.body.clientWidth >= 500 ? 'large' : 'default'))
 
   const locales = {
     zh: zh,
@@ -23,24 +21,26 @@
   }
 
   onBeforeMount(() => {
-    setThemeTransitionClass(true)
+    setBodyClass(true)
   })
 
   onMounted(() => {
     initState()
     saveUserData()
-    setThemeTransitionClass(false)
+    setBodyClass(false)
     systemUpgrade()
-    getUserInfo()
   })
 
-  // 获取用户信息
-  const getUserInfo = async () => {
-    if (userStore.isLogin) {
-      const res = await UserService.getUserInfo()
-      if (res.code === ApiStatus.success) {
-        userStore.setUserInfo(res.data)
-      }
+  // 提升暗黑主题下页面刷新视觉体验
+  const setBodyClass = (addClass: boolean) => {
+    let el = document.getElementsByTagName('body')[0]
+
+    if (addClass) {
+      el.setAttribute('class', 'theme-change')
+    } else {
+      setTimeout(() => {
+        el.removeAttribute('class')
+      }, 300)
     }
   }
 </script>

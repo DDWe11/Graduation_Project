@@ -1,4 +1,4 @@
-package org.jevonD.wastewaterMS.modules.data.dto.request;
+package org.jevonD.wastewaterMS.modules.data.dto.sensor.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

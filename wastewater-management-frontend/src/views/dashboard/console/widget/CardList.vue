@@ -21,7 +21,8 @@
   import { useSettingStore } from '@/store/modules/setting'
   import { CountTo } from 'vue3-count-to'
 
-  const { showWorkTab } = storeToRefs(useSettingStore())
+  const settingStore = useSettingStore()
+  const showWorkTab = computed(() => settingStore.showWorkTab)
 
   const dataList = reactive([
     {
@@ -45,7 +46,7 @@
       icon: '&#xe7aa;',
       startVal: 0,
       duration: 1000,
-      num: 9520,
+      num: 900,
       change: '-12%'
     },
     {

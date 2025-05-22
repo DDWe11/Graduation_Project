@@ -62,7 +62,7 @@
     margin-left: var(--console-margin);
 
     .list {
-      height: calc(100% - 90px);
+      height: calc(100% - 100px);
       margin-top: 10px;
       overflow: hidden;
 

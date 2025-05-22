@@ -101,7 +101,6 @@
   import { Search } from '@element-plus/icons-vue'
   import EmojiText from '@/utils/emojo'
   import { ArticleList } from '@/mock/temp/articleList'
-  import { useCommon } from '@/composables/useCommon'
 
   const yearVal = ref('All')
 
@@ -156,7 +155,7 @@
     isLoading.value = false
 
     if (backTop) {
-      useCommon().scrollToTop()
+      scrollToTop()
     }
 
     // const res = await ArticleService.getArticleList(params)
@@ -174,12 +173,20 @@
     //   if (searchVal.value) {
     //     searchVal.value = ''
     //   }
+
+    //   if (backTop) {
+    //     scrollToTop()
+    //   }
     // }
   }
 
   const handleCurrentChange = (val: number) => {
     currentPage.value = val
     getArticleList({ backTop: true })
+  }
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0 })
   }
 
   const toDetail = (item: ArticleType) => {

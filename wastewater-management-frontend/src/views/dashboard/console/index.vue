@@ -20,19 +20,25 @@
         <p>使用了 Vue3、TypeScript、Vite、Element Plus 等前沿技术</p>
 
         <div class="button-wrap">
-          <div class="btn art-custom-card" @click="goPage(WEB_LINKS.DOCS)">
+          <div
+            class="btn art-custom-card"
+            @click="goPage('https://www.lingchen.kim/art-design-pro/docs/')"
+          >
             <span>项目官网</span>
             <i class="iconfont-sys">&#xe703;</i>
           </div>
-          <div class="btn art-custom-card" @click="goPage(WEB_LINKS.INTRODUCE)">
+          <div
+            class="btn art-custom-card"
+            @click="goPage('https://www.lingchen.kim/art-design-pro/docs/guide/introduce.html')"
+          >
             <span>文档</span>
             <i class="iconfont-sys">&#xe703;</i>
           </div>
-          <div class="btn art-custom-card" @click="goPage(WEB_LINKS.GITHUB_HOME)">
+          <div class="btn art-custom-card" @click="goPage('https://github.com/Daymychen')">
             <span>Github</span>
             <i class="iconfont-sys">&#xe703;</i>
           </div>
-          <div class="btn art-custom-card" @click="goPage(WEB_LINKS.BLOG)">
+          <div class="btn art-custom-card" @click="goPage('https://www.lingchen.kim')">
             <span>博客</span>
             <i class="iconfont-sys">&#xe703;</i>
           </div>
@@ -49,11 +55,11 @@
   import SalesOverview from './widget/SalesOverview.vue'
   import NewUser from './widget/NewUser.vue'
   import Dynamic from './widget/Dynamic.vue'
-  import AppConfig from '@/config'
+  import { SystemInfo } from '@/config/setting'
   import TodoList from './widget/TodoList.vue'
+  import { scrollToTop } from '@/utils/utils'
   import { useSettingStore } from '@/store/modules/setting'
-  import { WEB_LINKS } from '@/utils/links'
-  import { useCommon } from '@/composables/useCommon'
+
   const settingStore = useSettingStore()
   const currentGlopTheme = computed(() => settingStore.systemThemeType)
 
@@ -62,8 +68,8 @@
     settingStore.reload()
   })
 
-  const systemName = AppConfig.systemInfo.name
-  useCommon().scrollToTop()
+  const systemName = SystemInfo.name
+  scrollToTop()
 
   const goPage = (url: string) => {
     // 跳转到新页面

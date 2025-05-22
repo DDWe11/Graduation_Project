@@ -1,5 +1,5 @@
 <template>
-  <div class="chat" :style="{ height: containerMinHeight }">
+  <div class="chat" :style="{ height: minHeight }">
     <el-row>
       <el-col :span="12">
         <div class="grid-content ep-bg-purple" />
@@ -72,17 +72,7 @@
             <span class="status-text">{{ isOnline ? '在线' : '离线' }}</span>
           </div>
         </div>
-        <div class="header-right">
-          <div class="btn">
-            <i class="iconfont-sys">&#xe776;</i>
-          </div>
-          <div class="btn">
-            <i class="iconfont-sys">&#xe778;</i>
-          </div>
-          <div class="btn">
-            <i class="iconfont-sys">&#xe6df;</i>
-          </div>
-        </div>
+        <div class="header-right"> </div>
       </div>
       <div class="chat-container">
         <!-- 聊天消息区域 -->
@@ -147,9 +137,7 @@
   import avatar8 from '@/assets/img/avatar/avatar8.jpg'
   import avatar9 from '@/assets/img/avatar/avatar9.jpg'
   import avatar10 from '@/assets/img/avatar/avatar10.jpg'
-  import { useCommon } from '@/composables/useCommon'
-
-  const { containerMinHeight } = useCommon()
+  import { useSettingStore } from '@/store/modules/setting'
 
   const searchQuery = ref('')
 
@@ -169,6 +157,9 @@
   }
 
   const selectedPerson = ref<Person | null>(null)
+  const settingStore = useSettingStore()
+  const showWorkTab = computed(() => settingStore.showWorkTab)
+  const minHeight = computed(() => `calc(100vh - ${showWorkTab.value ? 120 : 75}px)`)
 
   const personList = ref<Person[]>([
     {
@@ -595,27 +586,8 @@
       }
 
       .header-right {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-
-        .btn {
-          width: 42px;
-          height: 42px;
-          line-height: 42px;
-          text-align: center;
+        .icon-close {
           cursor: pointer;
-          border-radius: 50%;
-          transition: background-color 0.2s ease;
-
-          &:hover {
-            background-color: var(--art-gray-200);
-          }
-
-          i {
-            font-size: 20px;
-            color: var(--art-text-gray-700);
-          }
         }
       }
     }

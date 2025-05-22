@@ -3,33 +3,51 @@ package org.jevonD.wastewaterMS.modules.data.dto.history.response;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 
+/**
+ * 水厂每日关键数据分页响应DTO
+ */
 @Data
-public class PlantDailySummaryResp {
+public class PlantDailyDataQueryResp {
 
-    private Long id;
+    /**
+     * 总条数
+     */
+    private Long total;
 
-    private LocalDate recordDate;
+    /**
+     * 当前页数据
+     */
+    private List<PlantDailyDataItem> records;
 
-    private Double waterVolume;
+    @Data
+    public static class PlantDailyDataItem {
 
-    private Double electricity;
+        private Long id;
 
-    private Double totalEmission;
+        private LocalDate recordDate;
 
-    private Double emissionIntensity;
+        private Double waterVolume;
 
-    private Double totalChemicals;
+        private Double electricity;
 
-    private Double sludgeMass;
+        private Double totalEmission;
 
-    private Double codRemovalRate;
+        private Double emissionIntensity;
 
-    private Double tnRemovalRate;
+        private Double totalChemicals;
 
-    private Double nh3nRemovalRate;
+        private Double sludgeMass;
 
-    private Double ssRemovalRate;
+        private Double codRemovalRate;
 
-    private Double tpRemovalRate;
+        private Double tnRemovalRate;
+
+        private Double nh3nRemovalRate;
+
+        private Double ssRemovalRate;
+
+        private Double tpRemovalRate;
+    }
 }

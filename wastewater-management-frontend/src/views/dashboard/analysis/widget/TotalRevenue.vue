@@ -10,16 +10,32 @@
 </template>
 
 <script setup lang="ts">
+  import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+  import type { Ref } from 'vue'
+  import { useECharts } from '@/utils/echarts/useECharts'
+  import { useSettingStore } from '@/store/modules/setting'
   import { useI18n } from 'vue-i18n'
-  import { EChartsOption } from 'echarts'
-  import { useChart } from '@/composables/useChart'
 
   const { t } = useI18n()
 
-  const { chartRef, isDark, initChart } = useChart()
+  const store = useSettingStore()
+  const isDark = computed(() => store.isDark)
+
+  const chartRef = ref<HTMLDivElement | null>(null)
+  const { setOptions, removeResize, resize } = useECharts(chartRef as Ref<HTMLDivElement>)
+  const settingStore = useSettingStore()
+  const menuOpen = computed(() => settingStore.menuOpen)
+
+  // 监听菜单状态变化
+  watch(menuOpen, () => {
+    const delays = [100, 200, 300]
+    delays.forEach((delay) => {
+      setTimeout(resize, delay)
+    })
+  })
 
   // 创建图表选项
-  const options: () => EChartsOption = () => ({
+  const createChartOption = () => ({
     tooltip: {
       trigger: 'axis',
       axisPointer: {
@@ -97,12 +113,29 @@
     ]
   })
 
-  watch(isDark, () => {
-    initChart(options())
-  })
+  // 初始化图表
+  const initChart = () => {
+    if (chartRef.value) {
+      const option = createChartOption()
+      setOptions(option)
+    }
+  }
 
   onMounted(() => {
-    initChart(options())
+    initChart()
+  })
+
+  // 监听暗黑模式变化
+  watch(
+    isDark,
+    () => {
+      initChart()
+    },
+    { immediate: true }
+  )
+
+  onUnmounted(() => {
+    removeResize()
   })
 </script>
 

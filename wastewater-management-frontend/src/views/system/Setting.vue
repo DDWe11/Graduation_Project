@@ -50,12 +50,11 @@
 </template>
 
 <script setup lang="ts">
-  import AppConfig from '@/config'
-  import { WEB_LINKS } from '@/utils/links'
+  import { SystemInfo } from '@/config/setting'
 
   const sys = reactive({
-    name: AppConfig.systemInfo.name,
-    website: WEB_LINKS.BLOG,
+    name: SystemInfo.name,
+    website: 'https://www.lingchen.kim',
     keepAliveTime: '10',
     pictureSize: '10'
   })

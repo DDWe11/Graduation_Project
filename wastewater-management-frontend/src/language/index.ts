@@ -5,15 +5,9 @@ import { getSysStorage } from '@/utils/storage'
 
 // 动态导入语言文件
 const messages = {
-  [LanguageEnum.EN]: () => import('./locales/en.json'),
-  [LanguageEnum.ZH]: () => import('./locales/zh.json')
+  [LanguageEnum.EN]: () => import('./en'),
+  [LanguageEnum.ZH]: () => import('./zh')
 }
-
-// 语言选项
-export const languageOptions = [
-  { value: LanguageEnum.ZH, label: '简体中文' },
-  { value: LanguageEnum.EN, label: 'English' }
-]
 
 // 获取初始语言
 const getDefaultLanguage = (): LanguageEnum => {

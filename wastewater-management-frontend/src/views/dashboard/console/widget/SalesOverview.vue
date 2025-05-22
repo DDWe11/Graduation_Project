@@ -11,32 +11,40 @@
 </template>
 
 <script setup lang="ts">
+  import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
   import echarts from '@/plugins/echarts'
-  import { hexToRgba } from '@/utils/colors'
-  import { getCssVariable } from '@/utils/colors'
-  import { EChartsOption } from 'echarts'
-  import { useChart } from '@/composables/useChart'
+  import { useECharts } from '@/utils/echarts/useECharts'
+  import { hexToRgba } from '@/utils/utils'
+  import { useSettingStore } from '@/store/modules/setting'
+  import { SystemThemeEnum } from '@/enums/appEnum'
+  import { getCssVariable } from '@/utils/utils'
 
-  const {
-    chartRef,
-    isDark,
-    initChart,
-    getAxisLabelStyle,
-    getAxisLineStyle,
-    getAxisTickStyle,
-    getSplitLineStyle
-  } = useChart()
+  const chartRef = ref<HTMLDivElement>()
+  const { setOptions, removeResize, resize } = useECharts(chartRef as Ref<HTMLDivElement>)
 
-  watch(isDark, () => {
-    initChart(options())
+  const store = useSettingStore()
+  const theme = computed(() => store.systemThemeType)
+  const isLight = computed(() => theme.value === SystemThemeEnum.LIGHT)
+  const settingStore = useSettingStore()
+  const menuOpen = computed(() => settingStore.menuOpen)
+
+  // 收缩菜单时，重新计算图表大小
+  watch(menuOpen, () => {
+    const delays = [100, 200, 300]
+    delays.forEach((delay) => {
+      setTimeout(resize, delay)
+    })
   })
 
   onMounted(() => {
-    initChart(options())
+    createChart()
   })
 
-  const options: () => EChartsOption = () => {
-    return {
+  onUnmounted(() => {
+    removeResize()
+  })
+  const createChart = () => {
+    setOptions({
       grid: {
         left: '2.2%',
         right: '3%',
@@ -64,14 +72,39 @@
           '11月',
           '12月'
         ],
-        axisTick: getAxisTickStyle(),
-        axisLabel: getAxisLabelStyle(true),
-        axisLine: getAxisLineStyle(true)
+        axisLabel: {
+          show: true,
+          color: '#999',
+          margin: 20,
+          interval: 0,
+          fontSize: 13
+        },
+        axisLine: {
+          show: false
+        }
       },
       yAxis: {
-        axisLabel: getAxisLabelStyle(true),
-        axisLine: getAxisLineStyle(!isDark.value),
-        splitLine: getSplitLineStyle(true)
+        type: 'value',
+        axisLabel: {
+          show: true,
+          color: '#999',
+          fontSize: 13
+        },
+        axisLine: {
+          show: isLight.value ? true : false,
+          lineStyle: {
+            color: '#E8E8E8',
+            width: 1
+          }
+        },
+        splitLine: {
+          show: true,
+          lineStyle: {
+            color: isLight.value ? '#e8e8e8' : '#444',
+            width: 1,
+            type: 'dashed'
+          }
+        }
       },
       series: [
         {
@@ -99,7 +132,7 @@
           }
         }
       ]
-    }
+    })
   }
 </script>
 

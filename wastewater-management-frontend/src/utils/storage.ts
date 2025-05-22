@@ -3,7 +3,6 @@ import { router } from '@/router'
 import { useUserStore } from '@/store/modules/user'
 import { useSettingStore } from '@/store/modules/setting'
 import { useWorktabStore } from '@/store/modules/worktab'
-import { useTableStore } from '@/store/modules/table'
 
 // 初始化本地数据
 export function initState() {
@@ -11,24 +10,17 @@ export function initState() {
     const userStore = useUserStore()
     const worktabStore = useWorktabStore()
     const settingStore = useSettingStore()
-    const tableStore = useTableStore()
 
     userStore.initState()
     worktabStore.initState()
     settingStore.initState()
-    tableStore.initState()
   }
 }
 
 // 获取系统存储数据
 export function getSysStorage() {
-  const version = getSysVersion() || import.meta.env.VITE_VERSION
+  const version = localStorage.getItem('version') || import.meta.env.VITE_VERSION
   return localStorage.getItem(`sys-v${version}`) as any
-}
-
-// 获取系统版本
-export function getSysVersion() {
-  return localStorage.getItem('version')
 }
 
 // 验证本地存储数据的类型
@@ -149,8 +141,6 @@ export function saveUserData() {
   const eventType = isiOS ? 'pagehide' : 'beforeunload'
 
   window.addEventListener(eventType, () => {
-    if (getSysVersion()) {
-      useUserStore().saveUserData()
-    }
+    useUserStore().saveUserData()
   })
 }
